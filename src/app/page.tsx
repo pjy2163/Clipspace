@@ -230,11 +230,12 @@ function clipPreviewMeta(content: string) {
 }
 
 export default function Home() {
-  const [workspace, setWorkspace] = useState<WorkspaceMode>(loadWorkspaceMode);
-  const [hasSelectedWorkspace, setHasSelectedWorkspace] = useState(hasStoredWorkspace);
+  const [isReady, setIsReady] = useState(false);
+  const [workspace, setWorkspace] = useState<WorkspaceMode>("personal");
+  const [hasSelectedWorkspace, setHasSelectedWorkspace] = useState(false);
   const [clipsByWorkspace, setClipsByWorkspace] = useState<Record<WorkspaceMode, Clip[]>>(() => ({
-    personal: loadStoredClips("personal"),
-    team: loadStoredClips("team"),
+    personal: [],
+    team: [],
   }));
   const [query, setQuery] = useState("");
   const [activeType, setActiveType] = useState<ClipType | "all">("all");
@@ -243,10 +244,25 @@ export default function Home() {
   const clips = clipsByWorkspace[workspace];
 
   useEffect(() => {
+    const loadLocalState = window.setTimeout(() => {
+      setWorkspace(loadWorkspaceMode());
+      setHasSelectedWorkspace(hasStoredWorkspace());
+      setClipsByWorkspace({
+        personal: loadStoredClips("personal"),
+        team: loadStoredClips("team"),
+      });
+      setIsReady(true);
+    }, 0);
+
+    return () => window.clearTimeout(loadLocalState);
+  }, []);
+
+  useEffect(() => {
+    if (!isReady) return;
     window.localStorage.setItem(WORKSPACE_KEY, workspace);
     window.localStorage.setItem(STORAGE_KEYS.personal, JSON.stringify(clipsByWorkspace.personal));
     window.localStorage.setItem(STORAGE_KEYS.team, JSON.stringify(clipsByWorkspace.team));
-  }, [clipsByWorkspace, workspace]);
+  }, [clipsByWorkspace, isReady, workspace]);
 
   const selectWorkspace = (mode: WorkspaceMode) => {
     setWorkspace(mode);
@@ -357,6 +373,10 @@ export default function Home() {
   const removeClip = (id: string) => {
     setWorkspaceClips((current) => current.filter((clip) => clip.id !== id));
   };
+
+  if (!isReady) {
+    return <AppLoading />;
+  }
 
   return (
     <main className="min-h-screen bg-[#f4f6f5] text-[#18211d]">
@@ -536,6 +556,20 @@ export default function Home() {
             </div>
           )}
         </section>
+      </section>
+    </main>
+  );
+}
+
+function AppLoading() {
+  return (
+    <main className="grid min-h-screen place-items-center bg-[#f4f6f5] px-4 text-[#18211d]">
+      <section className="w-full max-w-sm rounded-lg border border-[#d8dfda] bg-white p-5 text-center shadow-sm">
+        <div className="mx-auto grid size-10 place-items-center rounded-md bg-[#18211d] text-xs font-bold text-white">
+          CL
+        </div>
+        <h1 className="mt-4 text-xl font-semibold">Cliplog</h1>
+        <p className="mt-2 text-sm text-[#64756d]">작업 공간을 불러오는 중입니다.</p>
       </section>
     </main>
   );
