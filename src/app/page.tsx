@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 type ClipType = "text" | "link" | "code" | "contact" | "sensitive";
+type WorkspaceMode = "personal" | "team";
 
 type Clip = {
   id: string;
@@ -16,7 +17,31 @@ type Clip = {
   flagged: boolean;
 };
 
-const STORAGE_KEY = "cliplog.clips.v1";
+const WORKSPACE_KEY = "cliplog.workspace.v1";
+const STORAGE_KEYS: Record<WorkspaceMode, string> = {
+  personal: "cliplog.clips.personal.v1",
+  team: "cliplog.clips.team.v1",
+};
+
+const workspaceCopy: Record<
+  WorkspaceMode,
+  { label: string; title: string; description: string; empty: string; status: string }
+> = {
+  personal: {
+    label: "개인",
+    title: "Personal clipboard",
+    description: "내가 복사한 메모, 코드, 링크를 혼자 쓰는 작업 로그로 정리합니다.",
+    empty: "개인 클립보드가 비어 있어요",
+    status: "개인 보드에 저장했어요.",
+  },
+  team: {
+    label: "팀",
+    title: "Team research board",
+    description: "팀 프로젝트에서 같이 볼 자료, 레퍼런스, 코드 조각을 모으는 공간입니다.",
+    empty: "팀 자료 보드가 비어 있어요",
+    status: "팀 자료 보드에 저장했어요.",
+  },
+};
 
 const typeLabels: Record<ClipType, string> = {
   text: "텍스트",
@@ -150,14 +175,28 @@ function refreshClipClassification(clip: Clip): Clip {
   };
 }
 
-function loadStoredClips() {
+function loadWorkspaceMode() {
+  if (typeof window === "undefined") return "personal";
+  const stored = window.localStorage.getItem(WORKSPACE_KEY);
+  return stored === "team" || stored === "personal" ? stored : "personal";
+}
+
+function hasStoredWorkspace() {
+  if (typeof window === "undefined") return true;
+  return window.localStorage.getItem(WORKSPACE_KEY) === "team" ||
+    window.localStorage.getItem(WORKSPACE_KEY) === "personal";
+}
+
+function loadStoredClips(mode: WorkspaceMode) {
   if (typeof window === "undefined") return [];
-  const raw = window.localStorage.getItem(STORAGE_KEY);
+  const raw =
+    window.localStorage.getItem(STORAGE_KEYS[mode]) ??
+    (mode === "personal" ? window.localStorage.getItem("cliplog.clips.v1") : null);
   if (!raw) return [];
   try {
     return (JSON.parse(raw) as Clip[]).map(refreshClipClassification);
   } catch {
-    window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(STORAGE_KEYS[mode]);
     return [];
   }
 }
@@ -191,15 +230,39 @@ function clipPreviewMeta(content: string) {
 }
 
 export default function Home() {
-  const [clips, setClips] = useState<Clip[]>(loadStoredClips);
+  const [workspace, setWorkspace] = useState<WorkspaceMode>(loadWorkspaceMode);
+  const [hasSelectedWorkspace, setHasSelectedWorkspace] = useState(hasStoredWorkspace);
+  const [clipsByWorkspace, setClipsByWorkspace] = useState<Record<WorkspaceMode, Clip[]>>(() => ({
+    personal: loadStoredClips("personal"),
+    team: loadStoredClips("team"),
+  }));
   const [query, setQuery] = useState("");
   const [activeType, setActiveType] = useState<ClipType | "all">("all");
   const [status, setStatus] = useState("복사한 뒤 이 화면을 클릭하거나 Cmd/Ctrl + V를 누르세요.");
   const [manualInput, setManualInput] = useState("");
+  const clips = clipsByWorkspace[workspace];
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(clips));
-  }, [clips]);
+    window.localStorage.setItem(WORKSPACE_KEY, workspace);
+    window.localStorage.setItem(STORAGE_KEYS.personal, JSON.stringify(clipsByWorkspace.personal));
+    window.localStorage.setItem(STORAGE_KEYS.team, JSON.stringify(clipsByWorkspace.team));
+  }, [clipsByWorkspace, workspace]);
+
+  const selectWorkspace = (mode: WorkspaceMode) => {
+    setWorkspace(mode);
+    setHasSelectedWorkspace(true);
+    setStatus(`${workspaceCopy[mode].label} 보드로 전환했어요.`);
+  };
+
+  const setWorkspaceClips = (
+    updater: Clip[] | ((current: Clip[]) => Clip[]),
+  ) => {
+    setClipsByWorkspace((current) => {
+      const nextClips =
+        typeof updater === "function" ? updater(current[workspace]) : updater;
+      return { ...current, [workspace]: nextClips };
+    });
+  };
 
   const addClip = (content: string, source: Clip["source"]) => {
     const clip = createClip(content, source);
@@ -212,11 +275,11 @@ export default function Home() {
       return;
     }
 
-    setClips((current) => [clip, ...current]);
+    setWorkspaceClips((current) => [clip, ...current]);
     setStatus(
       clip.flagged
         ? "민감할 수 있는 내용이라 Review로 분류했어요."
-        : "Cliplog에 저장했어요.",
+        : workspaceCopy[workspace].status,
     );
   };
 
@@ -284,7 +347,7 @@ export default function Home() {
   }, [clips]);
 
   const toggleFavorite = (id: string) => {
-    setClips((current) =>
+    setWorkspaceClips((current) =>
       current.map((clip) =>
         clip.id === id ? { ...clip, favorite: !clip.favorite } : clip,
       ),
@@ -292,11 +355,14 @@ export default function Home() {
   };
 
   const removeClip = (id: string) => {
-    setClips((current) => current.filter((clip) => clip.id !== id));
+    setWorkspaceClips((current) => current.filter((clip) => clip.id !== id));
   };
 
   return (
     <main className="min-h-screen bg-[#f4f6f5] text-[#18211d]">
+      {!hasSelectedWorkspace ? (
+        <WorkspaceChooser onSelect={selectWorkspace} />
+      ) : null}
       <section className="border-b border-[#d8dfda] bg-white">
         <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-4 sm:px-6 xl:flex-row xl:items-center xl:justify-between">
           <div className="space-y-2">
@@ -309,20 +375,34 @@ export default function Home() {
                   Cliplog
                 </p>
                 <h1 className="text-2xl font-semibold tracking-normal text-[#18211d] sm:text-3xl">
-                  Clipboard workspace
+                  {workspaceCopy[workspace].title}
                 </h1>
               </div>
             </div>
             <p className="max-w-3xl text-sm leading-6 text-[#64756d]">
-              복사한 뒤 Cliplog에서 붙여넣거나 가져오기 버튼을 누르면 날짜별 기록으로 정리됩니다.
-              긴 텍스트와 코드는 카드 안에서 접혀 화면을 밀어내지 않습니다.
+              {workspaceCopy[workspace].description} 복사한 뒤 Cliplog에서 붙여넣거나 가져오기
+              버튼을 누르면 날짜별 기록으로 정리됩니다.
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-2 rounded-lg border border-[#d8dfda] bg-[#f8faf9] p-2">
-            <Stat label="전체" value={stats.total} />
-            <Stat label="오늘" value={stats.today} />
-            <Stat label="검토" value={stats.flagged} />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="grid grid-cols-2 rounded-lg border border-[#d8dfda] bg-[#f8faf9] p-1">
+              <ModeButton
+                active={workspace === "personal"}
+                label="개인"
+                onClick={() => selectWorkspace("personal")}
+              />
+              <ModeButton
+                active={workspace === "team"}
+                label="팀"
+                onClick={() => selectWorkspace("team")}
+              />
+            </div>
+            <div className="grid grid-cols-3 gap-2 rounded-lg border border-[#d8dfda] bg-[#f8faf9] p-2">
+              <Stat label="전체" value={stats.total} />
+              <Stat label="오늘" value={stats.today} />
+              <Stat label="검토" value={stats.flagged} />
+            </div>
           </div>
         </div>
       </section>
@@ -410,9 +490,9 @@ export default function Home() {
             {clips.length > 0 ? (
               <button
                 className="rounded-md border border-[#d5ded8] px-3 py-2 text-sm font-medium text-[#64756d] transition hover:border-[#b4c0b8] hover:text-[#18211d]"
-                onClick={() => setClips([])}
+                onClick={() => setWorkspaceClips([])}
               >
-                전체 비우기
+                {workspaceCopy[workspace].label} 보드 비우기
               </button>
             ) : null}
           </div>
@@ -424,7 +504,7 @@ export default function Home() {
                   CL
                 </div>
                 <h3 className="mt-5 text-2xl font-semibold text-[#18211d]">
-                  아직 저장된 클립이 없어요
+                  {workspaceCopy[workspace].empty}
                 </h3>
                 <p className="mt-3 text-sm leading-6 text-[#64756d]">
                   다른 곳에서 텍스트나 링크를 복사한 뒤 이 화면에서 Cmd/Ctrl + V를 누르세요.
@@ -458,6 +538,75 @@ export default function Home() {
         </section>
       </section>
     </main>
+  );
+}
+
+function WorkspaceChooser({ onSelect }: { onSelect: (mode: WorkspaceMode) => void }) {
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-[#18211d]/35 px-4 backdrop-blur-sm">
+      <section className="w-full max-w-2xl rounded-lg border border-[#d8dfda] bg-white p-5 shadow-2xl">
+        <div className="flex items-start gap-3">
+          <div className="grid size-9 shrink-0 place-items-center rounded-md bg-[#18211d] text-xs font-bold text-white">
+            CL
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64756d]">
+              Start workspace
+            </p>
+            <h2 className="mt-1 text-2xl font-semibold text-[#18211d]">
+              어떤 클립보드로 시작할까요?
+            </h2>
+            <p className="mt-2 text-sm leading-6 text-[#64756d]">
+              개인 자료와 팀 자료를 분리해서 저장합니다. 언제든 상단에서 전환할 수 있어요.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          <button
+            className="rounded-lg border border-[#b9c8bf] bg-[#f8faf9] p-4 text-left transition hover:border-[#2f7d5b] hover:bg-[#eef5f1]"
+            onClick={() => onSelect("personal")}
+          >
+            <span className="text-sm font-semibold text-[#18211d]">개인으로 시작</span>
+            <span className="mt-2 block text-sm leading-6 text-[#64756d]">
+              내 메모, 코드 조각, 링크를 혼자 정리하는 기본 클립보드입니다.
+            </span>
+          </button>
+          <button
+            className="rounded-lg border border-[#b9c8bf] bg-[#f8faf9] p-4 text-left transition hover:border-[#2f7d5b] hover:bg-[#eef5f1]"
+            onClick={() => onSelect("team")}
+          >
+            <span className="text-sm font-semibold text-[#18211d]">팀으로 시작</span>
+            <span className="mt-2 block text-sm leading-6 text-[#64756d]">
+              프로젝트 자료 조사, 레퍼런스, 공유할 붙여넣기를 모으는 보드입니다.
+            </span>
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function ModeButton({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      className={
+        active
+          ? "rounded-md bg-[#18211d] px-4 py-2 text-sm font-semibold text-white"
+          : "rounded-md px-4 py-2 text-sm font-semibold text-[#64756d] transition hover:text-[#18211d]"
+      }
+      onClick={onClick}
+    >
+      {label}
+    </button>
   );
 }
 
