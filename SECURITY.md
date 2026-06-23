@@ -1,31 +1,31 @@
-# Security Notes
+# 보안 메모
 
-Cliplog handles clipboard data, so the main security goal is to keep the MVP predictable, local, and easy for users to understand.
+Cliplog는 클립보드 데이터를 다루는 서비스입니다. 그래서 MVP의 핵심 보안 목표는 사용자가 동작 방식을 쉽게 이해할 수 있고, 기본적으로 로컬에서 예측 가능하게 동작하는 것입니다.
 
-## Current Protections
+## 현재 적용한 보호 장치
 
-- Local-first storage: saved clips are stored in IndexedDB in the user's browser.
-- No authentication: the MVP avoids account, password, and profile data.
-- No backend sync: copied content is not uploaded by default.
-- Content Security Policy: `next.config.ts` defines CSP and other browser security headers.
-- Restricted image MIME types: only PNG, JPEG, WebP, and GIF image clips are accepted.
-- SVG excluded: SVG is not accepted because it can contain script-like behavior, external references, and XML features that need dedicated sanitization.
-- Sensitive-content detection: card numbers, phone-like numbers, API keys, tokens, passwords, and bearer strings are flagged before saving.
+- 로컬 우선 저장: 저장된 클립은 사용자의 브라우저 IndexedDB에 보관합니다.
+- 로그인 없음: MVP에서는 계정, 비밀번호, 프로필 정보를 다루지 않습니다.
+- 백엔드 동기화 없음: 기본 동작에서는 복사한 내용을 서버로 업로드하지 않습니다.
+- CSP 보안 헤더: `next.config.ts`에서 Content Security Policy와 주요 브라우저 보안 헤더를 설정합니다.
+- 이미지 MIME 제한: PNG, JPEG, WebP, GIF 이미지만 클립으로 허용합니다.
+- SVG 제외: SVG는 스크립트성 동작, 외부 참조, XML 기능을 포함할 수 있어 별도 살균 처리 없이 받지 않습니다.
+- 민감정보 감지: 카드번호, 전화번호 형태, API key, token, password, bearer 문자열처럼 보이는 텍스트를 저장 전후로 표시합니다.
 
-## Known Limitations
+## 알려진 한계
 
-- Sensitive-content detection is heuristic and can miss real secrets or flag harmless text.
-- IndexedDB data is still readable by anyone with access to the same browser profile.
-- Local-first storage does not replace device security, browser profile isolation, or OS-level encryption.
-- Share actions rely on the browser's Web Share API or clipboard API.
-- If ads, analytics, AI APIs, or sync are added later, the CSP and privacy model must be reviewed again.
+- 민감정보 감지는 정규식 기반 휴리스틱이라 실제 비밀값을 놓치거나 일반 텍스트를 잘못 표시할 수 있습니다.
+- IndexedDB 데이터는 같은 브라우저 프로필에 접근할 수 있는 사람에게 노출될 수 있습니다.
+- 로컬 우선 저장은 기기 보안, 브라우저 프로필 분리, OS 수준 암호화를 대체하지 않습니다.
+- 공유 기능은 브라우저의 Web Share API 또는 Clipboard API 동작에 의존합니다.
+- 광고, 분석, AI API, 동기화 기능을 추가하면 CSP와 개인정보 처리 방식을 다시 검토해야 합니다.
 
-## Recommended Next Steps
+## 다음 보안 개선 제안
 
-- Add a user setting to require confirmation before saving sensitive-looking clips.
-- Add an explicit "private mode" that blocks saving flagged content entirely.
-- Add export and delete-all controls for user data portability and cleanup.
-- Add production monitoring with privacy-safe events only.
-- Add dependency and secret scanning in CI.
-- Add CSP regression checks before enabling third-party scripts such as ads.
-- If SVG support is needed later, sanitize or rasterize SVG files before storage and rendering.
+- 민감정보로 보이는 클립은 저장 전 확인하도록 사용자 설정을 추가합니다.
+- 민감정보 저장을 아예 막는 프라이빗 모드를 제공합니다.
+- 전체 데이터 삭제와 내보내기 기능을 추가해 사용자가 데이터를 통제할 수 있게 합니다.
+- 개인정보를 포함하지 않는 범위에서 프로덕션 오류와 보안 이벤트를 관제합니다.
+- CI에서 의존성 취약점 검사와 secret scanning을 추가합니다.
+- 광고 같은 서드파티 스크립트를 붙이기 전 CSP 회귀 테스트를 추가합니다.
+- SVG 지원이 필요해지면 저장/렌더링 전에 살균 처리하거나 PNG/WebP로 변환합니다.

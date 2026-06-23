@@ -1,44 +1,46 @@
 # Cliplog
 
-Cliplog is a local-first clipboard dashboard for collecting copied text, links, code snippets, and pasted images into a readable timeline.
+![Cliplog 아이콘](./public/cliplog-icon.svg)
 
-I started this project because copied references are easy to lose while studying, debugging, or collecting materials for a team project. Cliplog focuses on a small but useful workflow: copy something, open the web app, paste or import it, and review everything by date, type, and workspace.
+Cliplog는 복사한 텍스트, 링크, 코드 조각, 이미지를 한눈에 정리하는 로컬 우선 클립보드 대시보드입니다.
 
-## Features
+공부하거나 개발하면서 자료를 찾다 보면 복사한 링크, 코드, 메모가 금방 흩어집니다. Cliplog는 이 불편함에서 시작한 프로젝트입니다. 복사한 내용을 웹에서 붙여넣거나 가져오면 날짜별 타임라인에 저장하고, 개인/팀 작업 공간에 맞춰 다시 찾아볼 수 있게 만드는 것이 목표입니다.
 
-- Save clipboard text with a paste shortcut or import button
-- Paste image clips and image memos
-- Organize clips into personal and team workspaces
-- Group saved clips by date in a dense responsive timeline
-- Detect links, code, contact-like text, and sensitive-looking content
-- Infer simple titles for copied links
-- Add threaded memos to each clip
-- Search, filter, pin, share, and delete clips
-- Resize the workspace panels for different screen sizes
+## 주요 기능
 
-## Privacy Model
+- 붙여넣기 단축키 또는 가져오기 버튼으로 클립 저장
+- 이미지 클립과 이미지 메모 저장
+- 개인/팀 작업 공간 분리
+- 날짜별 타임라인 정리
+- 링크, 코드, 연락처, 민감정보로 보이는 텍스트 자동 감지
+- 복사한 링크의 간단한 제목 추론
+- 클립별 댓글형 메모 작성
+- 검색, 필터, 고정, 공유, 삭제
+- 화면 크기에 맞춘 반응형 UI와 패널 크기 조절
 
-Cliplog is intentionally local-first for the MVP.
+## 개인정보와 보안 방향
 
-- No login is required.
-- Clipboard data is stored in the browser with IndexedDB.
-- The app does not send saved clips to a backend.
-- Sensitive-looking text is flagged before saving so the user can review it.
-- Pasted images are limited to `image/png`, `image/jpeg`, `image/webp`, and `image/gif`.
-- SVG images are excluded for now because they can contain scripts, event handlers, external references, and XML behavior that requires stricter sanitization.
+Cliplog MVP는 사용자가 가장 걱정할 수 있는 “내 복사 내용이 안전한가?”를 우선 고려해 로컬 우선 구조로 만들었습니다.
 
-See [SECURITY.md](./SECURITY.md) for the current security notes and next hardening steps.
+- 로그인 없이 사용할 수 있습니다.
+- 저장된 클립은 브라우저의 IndexedDB에 보관합니다.
+- 기본 동작에서는 저장된 클립을 서버로 전송하지 않습니다.
+- 카드번호, 토큰, API key처럼 보이는 텍스트는 민감 항목으로 표시합니다.
+- 붙여넣은 이미지는 `image/png`, `image/jpeg`, `image/webp`, `image/gif`만 허용합니다.
+- 사용자가 붙여넣는 SVG 이미지는 MVP에서 제외했습니다. SVG는 이미지처럼 보이지만 스크립트, 이벤트 핸들러, 외부 참조, XML 동작을 포함할 수 있어 별도 검증이 필요합니다.
 
-## Tech Stack
+자세한 보안 메모는 [SECURITY.md](./SECURITY.md)에 정리했습니다.
+
+## 기술 스택
 
 - Next.js 16
 - React 19
 - TypeScript
 - Tailwind CSS 4
-- IndexedDB for browser-side storage
-- Vercel-ready deployment
+- IndexedDB
+- Vercel 배포 구조
 
-## Getting Started
+## 실행 방법
 
 ```bash
 npm install
@@ -47,7 +49,7 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-## Scripts
+## 스크립트
 
 ```bash
 npm run dev
@@ -56,26 +58,26 @@ npm run build
 npm run start
 ```
 
-## Project Structure
+## 폴더 구조
 
 ```text
-src/app/          Next.js app entry
-src/components/   UI components
-src/lib/          clipboard, image, storage, and share logic
-src/styles/       shared UI class tokens
-src/types/        shared TypeScript types
+src/app/          Next.js 앱 진입점
+src/components/   UI 컴포넌트
+src/lib/          클립, 이미지, 저장소, 공유 로직
+src/styles/       공통 UI 스타일 토큰
+src/types/        공통 TypeScript 타입
 ```
 
-## Deployment
+## 배포
 
-Cliplog can be deployed as a standard Next.js project on Vercel.
+Cliplog는 일반적인 Next.js 프로젝트처럼 Vercel에 배포할 수 있습니다.
 
-For future monetization, ads can be added after the CSP is updated to allow only the required ad provider domains.
+추후 광고를 붙일 경우 CSP 설정에서 필요한 광고 제공 도메인만 제한적으로 허용하는 방식으로 확장할 예정입니다.
 
-## Roadmap
+## 로드맵
 
-- Browser extension or desktop helper for automatic clipboard capture
-- Optional AI summary and category suggestions
-- User-controlled export/import
-- Better monitoring for production errors and security-relevant events
-- Team sharing with explicit permission and stronger data isolation
+- 자동 클립보드 수집을 위한 브라우저 확장 프로그램 또는 데스크톱 헬퍼
+- 선택한 클립에 대한 AI 요약과 카테고리 제안
+- 사용자 데이터 내보내기/가져오기
+- 개인정보를 침해하지 않는 오류 및 보안 이벤트 관제
+- 명시적 권한 기반 팀 공유와 데이터 분리
