@@ -14,7 +14,7 @@ export function BrandIcon({ className = "size-10" }: BrandIconProps) {
         aria-hidden="true"
         className="size-full"
         height={256}
-        src="/cliplog-icon.svg"
+        src="/clipspace-icon.svg"
         width={256}
       />
     </span>

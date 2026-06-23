@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
 
 export const metadata: Metadata = {
-  title: "Cliplog 소개",
-  description: "복사한 링크, 코드, 메모, 이미지를 다시 찾기 쉽게 모으는 Cliplog를 소개합니다.",
+  title: "ClipSpace 소개",
+  description: "복사한 링크, 코드, 메모, 이미지를 다시 찾기 쉽게 모으는 ClipSpace를 소개합니다.",
 };
 
 export default function AboutPage() {
@@ -16,7 +16,7 @@ export default function AboutPage() {
       <InfoSection title="이런 불편함을 줄입니다">
         <p>
           자료를 찾다 보면 링크, 코드, 오류 메시지, 캡처 이미지가 계속 생깁니다.
-          그런데 한 번 더 복사하는 순간 이전 내용은 금방 사라집니다. Cliplog는 그런
+          그런데 한 번 더 복사하는 순간 이전 내용은 금방 사라집니다. ClipSpace는 그런
           자료를 날짜별 카드로 남겨 다시 꺼내 쓰기 쉽게 만듭니다.
         </p>
         <p>

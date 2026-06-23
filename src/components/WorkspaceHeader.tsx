@@ -44,7 +44,7 @@ export function WorkspaceHeader({
       <div className="mx-auto flex w-full max-w-[1440px] flex-col px-4 sm:px-5">
         <div className="flex min-h-20 flex-col gap-4 border-b border-[#edf0f4] py-4 lg:flex-row lg:items-center lg:justify-between">
           <button
-            aria-label="Cliplog 새로고침"
+            aria-label="ClipSpace 새로고침"
             className="flex w-fit items-center gap-3 rounded-xl transition hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-[#315fbd] focus:ring-offset-2"
             onClick={() => window.location.reload()}
             title="새로고침"
@@ -53,13 +53,13 @@ export function WorkspaceHeader({
             <BrandIcon className="size-11 rounded-xl" />
             <span className="text-left">
               <span className="block text-sm font-semibold uppercase tracking-[0.22em] text-[#7a828e]">
-                Cliplog
+                ClipSpace
               </span>
             </span>
           </button>
 
           <nav
-            aria-label="Cliplog 안내 페이지"
+            aria-label="ClipSpace 안내 페이지"
             className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[#202124] lg:justify-center"
           >
             {infoLinks.map((item) => (

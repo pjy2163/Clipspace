@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
 
 export const metadata: Metadata = {
-  title: "Cliplog 개인정보와 보안",
-  description: "Cliplog가 복사 내용을 어디에 저장하고 어떤 자료를 조심해야 하는지 안내합니다.",
+  title: "ClipSpace 개인정보와 보안",
+  description: "ClipSpace가 복사 내용을 어디에 저장하고 어떤 자료를 조심해야 하는지 안내합니다.",
 };
 
 export default function PrivacyPage() {
@@ -49,8 +49,8 @@ export default function PrivacyPage() {
 
       <InfoSection title="사용자가 기억해야 할 점">
         <p>
-          Cliplog는 자료 정리 도구이지 비밀번호 보관함이 아닙니다. 중요한 비밀값은
-          전용 비밀번호 관리 도구에 보관하고, Cliplog에는 다시 찾아야 할 링크, 코드,
+          ClipSpace는 자료 정리 도구이지 비밀번호 보관함이 아닙니다. 중요한 비밀값은
+          전용 비밀번호 관리 도구에 보관하고, ClipSpace에는 다시 찾아야 할 링크, 코드,
           메모, 이미지 위주로 남기는 것을 권장합니다.
         </p>
       </InfoSection>

@@ -52,7 +52,8 @@ function formatDay(date: string) {
   }).format(new Date(date));
 }
 
-const LAYOUT_KEY = "cliplog.layout.sidebarWidth.v1";
+const LAYOUT_KEY = "clipspace.layout.sidebarWidth.v1";
+const LEGACY_LAYOUT_KEY = "cliplog.layout.sidebarWidth.v1";
 const DEFAULT_SIDEBAR_WIDTH = 280;
 const MIN_SIDEBAR_WIDTH = 220;
 const MAX_SIDEBAR_WIDTH = 420;
@@ -134,7 +135,9 @@ export default function Home() {
         setWorkspace(selectedWorkspace);
         setHasSelectedWorkspace(Boolean(incomingTeamId) || hasStoredWorkspace());
         setClipsByWorkspace(nextStoredClips);
-        const storedSidebarWidth = Number(window.localStorage.getItem(LAYOUT_KEY));
+        const storedSidebarWidth = Number(
+          window.localStorage.getItem(LAYOUT_KEY) ?? window.localStorage.getItem(LEGACY_LAYOUT_KEY),
+        );
         if (Number.isFinite(storedSidebarWidth) && storedSidebarWidth > 0) {
           setSidebarWidth(clampSidebarWidth(storedSidebarWidth));
         }
@@ -274,7 +277,7 @@ export default function Home() {
   const addClipObject = (clip: Clip) => {
     if (clip.flagged) {
       const shouldSave = window.confirm(
-        "비밀번호, 토큰, 카드번호 같은 민감정보일 수 있어요. Cliplog에 저장할까요?",
+        "비밀번호, 토큰, 카드번호 같은 민감정보일 수 있어요. ClipSpace에 저장할까요?",
       );
       if (!shouldSave) {
         setStatus("민감할 수 있는 클립 저장을 취소했어요.");
@@ -294,7 +297,7 @@ export default function Home() {
 
     setWorkspaceClips((current) => [clip, ...current]);
     if (clip.type === "image") {
-      setStatus("이미지를 Cliplog에 저장했어요.");
+      setStatus("이미지를 ClipSpace에 저장했어요.");
       return;
     }
     setStatus(

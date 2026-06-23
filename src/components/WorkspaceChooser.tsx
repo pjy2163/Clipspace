@@ -28,7 +28,7 @@ export function WorkspaceChooser({
             className="h-auto w-full object-contain"
             height={630}
             priority
-            src="/opengraph-image.png"
+            src="/clipspace-preview.png"
             width={1200}
           />
         </div>

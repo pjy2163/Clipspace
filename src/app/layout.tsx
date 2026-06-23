@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-const title = "Cliplog";
+const title = "ClipSpace";
 const description =
-  "복사한 텍스트, 링크, 코드, 이미지를 로컬에서 정리하는 클립보드 대시보드입니다.";
+  "복사한 텍스트, 링크, 코드, 이미지를 나만의 작업 공간에 정리하는 클립보드 대시보드입니다.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -13,20 +13,20 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "32x32" },
-      { url: "/cliplog-icon.svg", type: "image/svg+xml" },
+      { url: "/clipspace-icon.svg", type: "image/svg+xml" },
     ],
   },
   openGraph: {
     title,
     description,
     url: "/",
-    siteName: "Cliplog",
+    siteName: "ClipSpace",
     images: [
       {
         url: "/opengraph-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Cliplog clipboard dashboard preview",
+        width: 1729,
+        height: 910,
+        alt: "ClipSpace clipboard workspace preview",
       },
     ],
     locale: "ko_KR",

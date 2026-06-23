@@ -1,12 +1,14 @@
 import { refreshClipClassification } from "@/lib/clip";
 import type { Clip, TeamBoard, WorkspaceKey, WorkspaceMode } from "@/types/clip";
 
-const WORKSPACE_KEY = "cliplog.workspace.v1";
+const WORKSPACE_KEY = "clipspace.workspace.v1";
+const LEGACY_WORKSPACE_KEY = "cliplog.workspace.v1";
 const LEGACY_STORAGE_KEYS: Record<WorkspaceMode, string> = {
   personal: "cliplog.clips.personal.v1",
   team: "cliplog.clips.team.v1",
 };
-const DB_NAME = "cliplog";
+const DB_NAME = "clipspace";
+const LEGACY_DB_NAME = "cliplog";
 const DB_VERSION = 1;
 const STORE_NAME = "workspace-state";
 const CLIPS_KEY = "clips";
@@ -25,9 +27,9 @@ const emptyState: StoredState = {
   teams: {},
 };
 
-function openCliplogDb() {
+function openWorkspaceDb(name = DB_NAME) {
   return new Promise<IDBDatabase>((resolve, reject) => {
-    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    const request = indexedDB.open(name, DB_VERSION);
     request.addEventListener("upgradeneeded", () => {
       const db = request.result;
       if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -40,7 +42,19 @@ function openCliplogDb() {
 }
 
 async function readStateFromIndexedDb() {
-  const db = await openCliplogDb();
+  const db = await openWorkspaceDb();
+  return new Promise<unknown | null>((resolve, reject) => {
+    const transaction = db.transaction(STORE_NAME, "readonly");
+    const store = transaction.objectStore(STORE_NAME);
+    const request = store.get(CLIPS_KEY);
+    request.addEventListener("success", () => resolve((request.result as StoredState) ?? null));
+    request.addEventListener("error", () => reject(request.error));
+    transaction.addEventListener("complete", () => db.close());
+  });
+}
+
+async function readStateFromLegacyIndexedDb() {
+  const db = await openWorkspaceDb(LEGACY_DB_NAME);
   return new Promise<unknown | null>((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, "readonly");
     const store = transaction.objectStore(STORE_NAME);
@@ -52,7 +66,7 @@ async function readStateFromIndexedDb() {
 }
 
 async function writeStateToIndexedDb(state: StoredState) {
-  const db = await openCliplogDb();
+  const db = await openWorkspaceDb();
   return new Promise<void>((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, "readwrite");
     const store = transaction.objectStore(STORE_NAME);
@@ -119,21 +133,23 @@ function normalizeState(state: StoredState) {
 
 export function loadWorkspaceMode(): WorkspaceKey {
   if (typeof window === "undefined") return "personal";
-  const stored = window.localStorage.getItem(WORKSPACE_KEY);
+  const stored =
+    window.localStorage.getItem(WORKSPACE_KEY) ?? window.localStorage.getItem(LEGACY_WORKSPACE_KEY);
   if (stored === "team") return "team:default";
   return isWorkspaceKey(stored) ? stored : "personal";
 }
 
 export function hasStoredWorkspace() {
   if (typeof window === "undefined") return true;
-  const stored = window.localStorage.getItem(WORKSPACE_KEY);
+  const stored =
+    window.localStorage.getItem(WORKSPACE_KEY) ?? window.localStorage.getItem(LEGACY_WORKSPACE_KEY);
   return stored === "personal" || stored === "team" || Boolean(stored?.startsWith("team:"));
 }
 
 export async function loadStoredClips(): Promise<StoredState> {
   if (typeof window === "undefined") return emptyState;
 
-  const indexedState = await readStateFromIndexedDb();
+  const indexedState = (await readStateFromIndexedDb()) ?? (await readStateFromLegacyIndexedDb());
   if (indexedState) {
     if (isV2State(indexedState)) return normalizeState(indexedState);
     const legacyState = indexedState as Partial<Record<WorkspaceMode, Clip[]>>;

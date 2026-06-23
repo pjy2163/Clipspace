@@ -19,7 +19,7 @@ export function SiteFooter() {
             <BrandIcon className="size-11 rounded-xl" />
             <span>
               <span className="block text-sm font-semibold uppercase tracking-[0.22em] text-[#7a828e]">
-                Cliplog
+                ClipSpace
               </span>
               <span className="text-sm font-medium text-[#5f6673]">
                 복사한 자료를 다시 찾기 쉽게
@@ -30,7 +30,7 @@ export function SiteFooter() {
             개인 클립은 브라우저에 저장하고, 팀 자료는 링크 보드로 필요한 사람과 공유합니다.
           </p>
           <p className="text-xs font-medium text-[#8a929f]">
-            © {new Date().getFullYear()} Cliplog. All rights reserved.
+            © {new Date().getFullYear()} ClipSpace. All rights reserved.
           </p>
         </div>
 
@@ -43,7 +43,7 @@ export function SiteFooter() {
             {contactEmail}
           </a>
           <nav
-            aria-label="Cliplog 하단 안내 페이지"
+            aria-label="ClipSpace 하단 안내 페이지"
             className="flex flex-wrap gap-x-3 gap-y-2 text-sm font-medium text-[#5f6673]"
           >
             {footerLinks.map((item) => (

@@ -2,20 +2,20 @@ import type { Metadata } from "next";
 import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
 
 export const metadata: Metadata = {
-  title: "Cliplog 사용법",
-  description: "복사한 내용을 Cliplog에 저장하고 메모, 검색, 팀 공유로 다시 쓰는 방법입니다.",
+  title: "ClipSpace 사용법",
+  description: "복사한 내용을 ClipSpace에 저장하고 메모, 검색, 팀 공유로 다시 쓰는 방법입니다.",
 };
 
 export default function GuidePage() {
   return (
     <InfoPage
-      description="복사하고, 가져오고, 필요할 때 검색하세요. Cliplog는 직접 저장한 클립만 보관합니다."
+      description="복사하고, 가져오고, 필요할 때 검색하세요. ClipSpace는 직접 저장한 클립만 보관합니다."
       eyebrow="Guide"
       title="복사한 내용을 카드로 쌓는 방법"
     >
       <InfoSection title="1. 복사한 뒤 가져오기">
         <p>
-          링크나 코드를 복사한 뒤 Cliplog에서 가져오기 버튼을 누르면 카드로 저장됩니다.
+          링크나 코드를 복사한 뒤 ClipSpace에서 가져오기 버튼을 누르면 카드로 저장됩니다.
           브라우저 권한이 막히면 직접 추가 칸에 붙여넣고 Enter를 누르면 됩니다.
         </p>
         <InfoList

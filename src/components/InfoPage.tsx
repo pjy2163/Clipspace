@@ -28,7 +28,7 @@ export function InfoPage({ eyebrow, title, description, children }: InfoPageProp
             <BrandIcon className="size-10 rounded-xl" />
             <span>
               <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-[#7a828e]">
-                Cliplog
+                ClipSpace
               </span>
               <span className="text-lg font-semibold">클립보드 작업 로그</span>
             </span>
@@ -62,14 +62,14 @@ export function InfoPage({ eyebrow, title, description, children }: InfoPageProp
         </article>
 
         <aside className="space-y-4">
-          <div className="overflow-hidden rounded-lg border border-[#e2e8f3] bg-white shadow-sm">
+          <div className="aspect-[1200/630] overflow-hidden rounded-lg border border-[#e2e8f3] bg-white shadow-sm">
             <Image
               alt=""
               aria-hidden="true"
-              className="h-auto w-full"
+              className="size-full object-contain"
               height={630}
               priority
-              src="/opengraph-image.png"
+              src="/clipspace-preview.png"
               width={1200}
             />
           </div>

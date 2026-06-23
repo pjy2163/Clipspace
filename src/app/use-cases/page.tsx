@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
 
 export const metadata: Metadata = {
-  title: "Cliplog 활용 사례",
-  description: "공부, 개발, 자료 조사, 팀 프로젝트에서 Cliplog를 쓰기 좋은 상황입니다.",
+  title: "ClipSpace 활용 사례",
+  description: "공부, 개발, 자료 조사, 팀 프로젝트에서 ClipSpace를 쓰기 좋은 상황입니다.",
 };
 
 export default function UseCasesPage() {
@@ -11,12 +11,12 @@ export default function UseCasesPage() {
     <InfoPage
       description="복사할 것은 많은데 어디에 뒀는지 자주 잊는 작업에 잘 맞습니다."
       eyebrow="Use cases"
-      title="이럴 때 Cliplog가 편합니다"
+      title="이럴 때 ClipSpace가 편합니다"
     >
       <InfoSection title="개발 공부">
         <p>
           알고리즘 풀이, 디버깅, 라이브러리 설정을 하다 보면 코드 조각과 에러 메시지를
-          자주 복사합니다. Cliplog에 모아두면 방금 참고한 코드와 링크를 다시 찾기
+          자주 복사합니다. ClipSpace에 모아두면 방금 참고한 코드와 링크를 다시 찾기
           쉽습니다.
         </p>
         <InfoList
