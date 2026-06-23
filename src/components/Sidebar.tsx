@@ -9,9 +9,11 @@ type SidebarProps = {
   manualInput: string;
   query: string;
   status: string;
+  sharedTeamLink?: string;
   manualInputRef: RefObject<HTMLTextAreaElement | null>;
   onAddManualClip: () => void;
   onImportFromClipboard: () => void;
+  onCopySharedTeamLink?: () => void;
   onManualInputChange: (value: string) => void;
   onManualKeyDown: (event: ReactKeyboardEvent<HTMLTextAreaElement>) => void;
   onQueryChange: (value: string) => void;
@@ -22,10 +24,12 @@ export function Sidebar({
   activeType,
   manualInput,
   query,
+  sharedTeamLink,
   status,
   manualInputRef,
   onAddManualClip,
   onImportFromClipboard,
+  onCopySharedTeamLink,
   onManualInputChange,
   onManualKeyDown,
   onQueryChange,
@@ -95,7 +99,28 @@ export function Sidebar({
       </div>
 
       <div className={ui.panel.status}>
-        {status}
+        <p>{status}</p>
+        {sharedTeamLink ? (
+          <div className="mt-3 space-y-2 rounded-md border border-[#c8d5eb] bg-white p-2">
+            <a
+              className="block truncate text-xs font-semibold text-[#315fbd] underline-offset-2 hover:underline"
+              href={sharedTeamLink}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {sharedTeamLink}
+            </a>
+            {onCopySharedTeamLink ? (
+              <button
+                className="rounded-md border border-[#d7dce5] px-2 py-1 text-xs font-semibold text-[#354052] transition hover:bg-[#f6f7f9]"
+                onClick={onCopySharedTeamLink}
+                type="button"
+              >
+                링크 다시 복사
+              </button>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <div className={ui.panel.padded}>

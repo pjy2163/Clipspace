@@ -62,6 +62,40 @@ function clampSidebarWidth(value: number) {
   return Math.min(MAX_SIDEBAR_WIDTH, Math.max(MIN_SIDEBAR_WIDTH, Math.round(value)));
 }
 
+function createShareAccessKey() {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID().replace(/-/g, "")
+    : `${Date.now()}${Math.random().toString(16).slice(2)}`;
+}
+
+async function copyText(value: string) {
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(value);
+      return true;
+    }
+  } catch {
+    // Fall back to a temporary textarea below.
+  }
+
+  try {
+    const textarea = document.createElement("textarea");
+    textarea.value = value;
+    textarea.setAttribute("readonly", "");
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    textarea.style.top = "0";
+    document.body.appendChild(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, value.length);
+    const copied = document.execCommand("copy");
+    document.body.removeChild(textarea);
+    return copied;
+  } catch {
+    return false;
+  }
+}
+
 export default function Home() {
   const [isReady, setIsReady] = useState(false);
   const [workspace, setWorkspace] = useState<WorkspaceKey>("personal");
@@ -73,6 +107,7 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [activeType, setActiveType] = useState<ClipType | "all">("all");
   const [status, setStatus] = useState("복사한 뒤 이 화면을 클릭하거나 Cmd/Ctrl + V를 누르세요.");
+  const [sharedTeamLink, setSharedTeamLink] = useState("");
   const [manualInput, setManualInput] = useState("");
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH);
   const manualInputRef = useRef<HTMLTextAreaElement>(null);
@@ -116,6 +151,19 @@ export default function Home() {
             };
             setStatus(`${remoteBoard.name} 팀 보드를 불러왔어요.`);
           } catch {
+            nextStoredClips = {
+              ...storedClips,
+              teams: {
+                ...storedClips.teams,
+                [incomingTeamId]: {
+                  id: incomingTeamId,
+                  name: `공유 팀 ${incomingTeamId.slice(0, 4).toUpperCase()}`,
+                  createdAt: new Date().toISOString(),
+                  accessKey: incomingTeamKey,
+                  clips: [],
+                },
+              },
+            };
             setStatus("팀 링크를 불러오지 못했어요. 링크가 맞는지 확인해 주세요.");
           }
         } else if (incomingTeamId && !storedClips.teams[incomingTeamId]) {
@@ -179,6 +227,7 @@ export default function Home() {
   const selectWorkspace = (mode: WorkspaceKey) => {
     setWorkspace(mode);
     setHasSelectedWorkspace(true);
+    setSharedTeamLink("");
     const modeKind = getWorkspaceMode(mode);
     setStatus(`${workspaceCopy[modeKind].label} 보드로 전환했어요.`);
     if (mode === "personal") {
@@ -240,6 +289,7 @@ export default function Home() {
     }
 
     const id = createTeamBoardId();
+    const accessKey = createShareAccessKey();
     setClipsByWorkspace((current) => ({
       ...current,
       teams: {
@@ -248,6 +298,7 @@ export default function Home() {
           id,
           name: trimmedName,
           createdAt: new Date().toISOString(),
+          accessKey,
           clips: [],
         },
       },
@@ -259,19 +310,35 @@ export default function Home() {
   const copyTeamLink = async () => {
     const teamId = getTeamIdFromWorkspace(workspace);
     if (!teamId) return;
-    if (!currentTeam?.accessKey) {
-      setStatus("이 팀 보드는 공유 키가 없어요. 새 팀 보드를 생성해 링크를 복사해 주세요.");
-      return;
-    }
+    const accessKey = currentTeam?.accessKey;
     const url = new URL(window.location.href);
     url.searchParams.set("team", teamId);
-    url.searchParams.set("key", currentTeam.accessKey);
-    try {
-      await navigator.clipboard.writeText(url.toString());
-      setStatus("팀 링크를 복사했어요. 같은 주소로 팀 보드 위치를 열 수 있습니다.");
-    } catch {
-      setStatus(`팀 링크: ${url.toString()}`);
+    if (accessKey) url.searchParams.set("key", accessKey);
+    else url.searchParams.delete("key");
+
+    const link = url.toString();
+    setSharedTeamLink(link);
+    const copied = await copyText(link);
+    setStatus(
+      copied
+        ? accessKey
+          ? "팀 링크를 복사했어요. 같은 주소로 팀 보드를 열 수 있습니다."
+          : "로컬 팀 링크를 복사했어요. Supabase 연결 전에는 다른 기기와 동기화되지 않습니다."
+        : "브라우저가 자동 복사를 막았어요. 아래 링크를 직접 복사해 주세요.",
+    );
+  };
+
+  const copySharedTeamLink = async () => {
+    if (!sharedTeamLink) {
+      await copyTeamLink();
+      return;
     }
+    const copied = await copyText(sharedTeamLink);
+    setStatus(
+      copied
+        ? "팀 링크를 다시 복사했어요."
+        : "브라우저가 자동 복사를 막았어요. 아래 링크를 직접 복사해 주세요.",
+    );
   };
 
   const addClipObject = (clip: Clip) => {
@@ -521,12 +588,14 @@ export default function Home() {
           manualInput={manualInput}
           manualInputRef={manualInputRef}
           onAddManualClip={addManualClip}
+          onCopySharedTeamLink={() => void copySharedTeamLink()}
           onImportFromClipboard={importFromClipboard}
           onManualInputChange={setManualInput}
           onManualKeyDown={handleManualKeyDown}
           onQueryChange={setQuery}
           onSelectType={setActiveType}
           query={query}
+          sharedTeamLink={sharedTeamLink}
           status={status}
         />
 
