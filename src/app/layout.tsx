@@ -42,6 +42,9 @@ export const metadata: Metadata = {
     description,
     images: [previewImage],
   },
+  other: {
+    "google-adsense-account": "ca-pub-7211753432405785",
+  },
 };
 
 export default function RootLayout({
