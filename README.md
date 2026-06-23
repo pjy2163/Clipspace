@@ -38,7 +38,6 @@ Cliplog MVP는 사용자가 가장 걱정할 수 있는 “내 복사 내용이 
 - TypeScript
 - Tailwind CSS 4
 - IndexedDB
-- Vercel 배포 구조
 
 ## 실행 방법
 
@@ -47,7 +46,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+브라우저에서 `http://localhost:3000`을 엽니다.
 
 ## 스크립트
 
@@ -67,17 +66,3 @@ src/lib/          클립, 이미지, 저장소, 공유 로직
 src/styles/       공통 UI 스타일 토큰
 src/types/        공통 TypeScript 타입
 ```
-
-## 배포
-
-Cliplog는 일반적인 Next.js 프로젝트처럼 Vercel에 배포할 수 있습니다.
-
-추후 광고를 붙일 경우 CSP 설정에서 필요한 광고 제공 도메인만 제한적으로 허용하는 방식으로 확장할 예정입니다.
-
-## 로드맵
-
-- 자동 클립보드 수집을 위한 브라우저 확장 프로그램 또는 데스크톱 헬퍼
-- 선택한 클립에 대한 AI 요약과 카테고리 제안
-- 사용자 데이터 내보내기/가져오기
-- 개인정보를 침해하지 않는 오류 및 보안 이벤트 관제
-- 명시적 권한 기반 팀 공유와 데이터 분리
