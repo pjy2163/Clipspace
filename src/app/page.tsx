@@ -33,6 +33,7 @@ import {
   saveWorkspaceState,
   type StoredState,
 } from "@/lib/storage";
+import { createRemoteTeamBoard, loadRemoteTeamBoard, saveRemoteTeamClips } from "@/lib/team-api";
 import { ui } from "@/styles/ui";
 import type { Clip, ClipImage, ClipSource, ClipType, TeamBoard, WorkspaceKey } from "@/types/clip";
 
@@ -94,25 +95,41 @@ export default function Home() {
       try {
         const storedClips = await loadStoredClips();
         if (cancelled) return;
-        const incomingTeamId = new URLSearchParams(window.location.search).get("team")?.trim();
+        const params = new URLSearchParams(window.location.search);
+        const incomingTeamId = params.get("team")?.trim();
+        const incomingTeamKey = params.get("key")?.trim();
         const selectedWorkspace = incomingTeamId
           ? createTeamWorkspaceKey(incomingTeamId)
           : loadWorkspaceMode();
-        const nextStoredClips =
-          incomingTeamId && !storedClips.teams[incomingTeamId]
-            ? {
-                ...storedClips,
-                teams: {
-                  ...storedClips.teams,
-                  [incomingTeamId]: {
-                    id: incomingTeamId,
-                    name: `공유 팀 ${incomingTeamId.slice(0, 4).toUpperCase()}`,
-                    createdAt: new Date().toISOString(),
-                    clips: [],
-                  },
-                },
-              }
-            : storedClips;
+        let nextStoredClips = storedClips;
+        if (incomingTeamId && incomingTeamKey) {
+          try {
+            const remoteBoard = await loadRemoteTeamBoard(incomingTeamId, incomingTeamKey);
+            nextStoredClips = {
+              ...storedClips,
+              teams: {
+                ...storedClips.teams,
+                [incomingTeamId]: remoteBoard,
+              },
+            };
+            setStatus(`${remoteBoard.name} 팀 보드를 불러왔어요.`);
+          } catch {
+            setStatus("팀 링크를 불러오지 못했어요. 링크가 맞는지 확인해 주세요.");
+          }
+        } else if (incomingTeamId && !storedClips.teams[incomingTeamId]) {
+          nextStoredClips = {
+            ...storedClips,
+            teams: {
+              ...storedClips.teams,
+              [incomingTeamId]: {
+                id: incomingTeamId,
+                name: `공유 팀 ${incomingTeamId.slice(0, 4).toUpperCase()}`,
+                createdAt: new Date().toISOString(),
+                clips: [],
+              },
+            },
+          };
+        }
         setWorkspace(selectedWorkspace);
         setHasSelectedWorkspace(Boolean(incomingTeamId) || hasStoredWorkspace());
         setClipsByWorkspace(nextStoredClips);
@@ -142,6 +159,13 @@ export default function Home() {
       setStatus("저장소에 기록하지 못했어요. 브라우저 저장 공간을 확인해 주세요.");
     });
   }, [clipsByWorkspace, isReady, workspace]);
+
+  useEffect(() => {
+    if (!isReady || workspace === "personal" || !currentTeamId || !currentTeam?.accessKey) return;
+    saveRemoteTeamClips(currentTeamId, currentTeam.accessKey, currentTeam.clips).catch(() => {
+      setStatus("팀 보드를 Supabase에 동기화하지 못했어요.");
+    });
+  }, [currentTeam?.accessKey, currentTeam?.clips, currentTeamId, isReady, workspace]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -178,6 +202,7 @@ export default function Home() {
         id: teamId,
         name: `공유 팀 ${teamId.slice(0, 4).toUpperCase()}`,
         createdAt: new Date().toISOString(),
+        accessKey: undefined,
         clips: [],
       };
       const nextClips =
@@ -192,9 +217,25 @@ export default function Home() {
     });
   };
 
-  const createTeamBoard = (name: string) => {
-    const id = createTeamBoardId();
+  const createTeamBoard = async (name: string) => {
     const trimmedName = name.trim() || `팀 보드 ${teamBoards.length + 1}`;
+    try {
+      const remoteBoard = await createRemoteTeamBoard(trimmedName);
+      setClipsByWorkspace((current) => ({
+        ...current,
+        teams: {
+          ...current.teams,
+          [remoteBoard.id]: remoteBoard,
+        },
+      }));
+      selectWorkspace(createTeamWorkspaceKey(remoteBoard.id));
+      setStatus(`${remoteBoard.name} 팀 보드를 만들었어요. 링크를 복사해 공유할 수 있습니다.`);
+      return;
+    } catch {
+      setStatus("Supabase 팀 보드를 만들지 못했어요. 로컬 팀 보드로 임시 생성합니다.");
+    }
+
+    const id = createTeamBoardId();
     setClipsByWorkspace((current) => ({
       ...current,
       teams: {
@@ -214,8 +255,13 @@ export default function Home() {
   const copyTeamLink = async () => {
     const teamId = getTeamIdFromWorkspace(workspace);
     if (!teamId) return;
+    if (!currentTeam?.accessKey) {
+      setStatus("이 팀 보드는 공유 키가 없어요. 새 팀 보드를 생성해 링크를 복사해 주세요.");
+      return;
+    }
     const url = new URL(window.location.href);
     url.searchParams.set("team", teamId);
+    url.searchParams.set("key", currentTeam.accessKey);
     try {
       await navigator.clipboard.writeText(url.toString());
       setStatus("팀 링크를 복사했어요. 같은 주소로 팀 보드 위치를 열 수 있습니다.");

@@ -43,10 +43,14 @@ Cliplog MVP는 사용자가 가장 걱정할 수 있는 “내 복사 내용이 
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
 ```
 
 브라우저에서 `http://localhost:3000`을 엽니다.
+
+팀 보드 동기화를 사용하려면 Supabase SQL Editor에서
+[`supabase/schema.sql`](./supabase/schema.sql)을 실행하고 `.env.local`에 Supabase 값을 채웁니다.
 
 ## 스크립트
 
