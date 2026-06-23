@@ -1,8 +1,8 @@
+import Image from "next/image";
 import { getWorkspaceMode, workspaceCopy } from "@/lib/clip";
 import { ui } from "@/styles/ui";
 import type { Clip, ClipImage, WorkspaceKey } from "@/types/clip";
 import { ClipCard } from "./ClipCard";
-import { BrandIcon } from "./common";
 
 type TimelineProps = {
   clips: Clip[];
@@ -55,8 +55,18 @@ export function Timeline({
 
       {clips.length === 0 ? (
         <div className={ui.timeline.empty}>
-          <div className="max-w-md">
-            <BrandIcon className="mx-auto size-16 rounded-2xl" />
+          <div className="max-w-xl">
+            <div className="mx-auto overflow-hidden rounded-lg border border-[#e2e8f3] bg-[#f7faff] shadow-sm">
+              <Image
+                alt=""
+                aria-hidden="true"
+                className="h-auto w-full object-contain"
+                height={630}
+                priority={false}
+                src="/opengraph-image.png"
+                width={1200}
+              />
+            </div>
             <h3 className="mt-5 text-2xl font-semibold text-[#18211d]">
               {workspaceCopy[mode].empty}
             </h3>

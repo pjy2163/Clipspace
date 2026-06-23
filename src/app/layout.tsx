@@ -1,14 +1,42 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const title = "Cliplog";
+const description =
+  "복사한 텍스트, 링크, 코드, 이미지를 로컬에서 정리하는 클립보드 대시보드입니다.";
+
 export const metadata: Metadata = {
-  title: "Cliplog",
-  description: "복사한 텍스트, 링크, 코드, 이미지를 로컬에서 정리하는 클립보드 대시보드입니다.",
+  metadataBase: new URL(siteUrl),
+  title,
+  description,
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "32x32" },
       { url: "/cliplog-icon.svg", type: "image/svg+xml" },
     ],
+  },
+  openGraph: {
+    title,
+    description,
+    url: "/",
+    siteName: "Cliplog",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Cliplog clipboard dashboard preview",
+      },
+    ],
+    locale: "ko_KR",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: ["/twitter-image.png"],
   },
 };
 

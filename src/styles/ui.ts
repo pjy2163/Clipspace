@@ -47,11 +47,11 @@ export const ui = {
     content: "space-y-5 p-3 sm:p-4",
     dayHeader: "mb-2 flex items-center gap-3",
     divider: "h-px flex-1 bg-[#e5e8ee]",
-    grid: "grid gap-2 md:grid-cols-2 lg:grid-cols-3",
+    grid: "columns-1 gap-3 md:columns-2 lg:columns-3",
   },
   clip: {
     card:
-      "min-w-0 self-start rounded-lg border border-[#e2e5ea] bg-white p-3 transition hover:border-[#c9d0dc]",
+      "mb-3 inline-block w-full min-w-0 break-inside-avoid rounded-lg border border-[#e2e5ea] bg-white p-3 transition hover:border-[#c9d0dc]",
     header: "flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between",
     metaRow: "flex min-w-0 flex-nowrap items-center gap-1.5 overflow-hidden",
     category:

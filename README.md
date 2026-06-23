@@ -1,6 +1,6 @@
 # Cliplog
 
-![Cliplog 아이콘](./public/cliplog-icon.svg)
+![Cliplog 미리보기](./src/app/opengraph-image.png)
 
 Cliplog는 복사한 텍스트, 링크, 코드 조각, 이미지를 한눈에 정리하는 로컬 우선 클립보드 대시보드입니다.
 

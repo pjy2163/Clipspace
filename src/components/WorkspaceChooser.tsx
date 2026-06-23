@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "next/image";
 import { createTeamWorkspaceKey } from "@/lib/clip";
 import type { TeamBoard, WorkspaceKey } from "@/types/clip";
 import { BrandIcon } from "./common";
@@ -20,6 +21,18 @@ export function WorkspaceChooser({
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-[#18211d]/35 px-4 backdrop-blur-sm">
       <section className="max-h-[88vh] w-full max-w-3xl overflow-auto rounded-lg border border-[#d8dfda] bg-white p-5 shadow-2xl">
+        <div className="mb-5 overflow-hidden rounded-lg border border-[#e2e8f3] bg-[#f7faff]">
+          <Image
+            alt=""
+            aria-hidden="true"
+            className="h-auto w-full object-contain"
+            height={630}
+            priority
+            src="/opengraph-image.png"
+            width={1200}
+          />
+        </div>
+
         <div className="flex items-start gap-3">
           <BrandIcon className="size-11 rounded-2xl" />
           <div>
