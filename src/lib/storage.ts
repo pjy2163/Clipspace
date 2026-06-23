@@ -117,16 +117,18 @@ function normalizeState(state: StoredState) {
   return {
     personal: (state.personal ?? []).map(refreshClipClassification),
     teams: Object.fromEntries(
-      Object.entries(state.teams ?? {}).map(([id, team]) => [
-        id,
-        {
+      Object.entries(state.teams ?? {})
+        .filter(([, team]) => Boolean(team.accessKey))
+        .map(([id, team]) => [
           id,
-          name: normalizeTeamName(id, team.name),
-          createdAt: team.createdAt ?? new Date().toISOString(),
-          accessKey: team.accessKey,
-          clips: (team.clips ?? []).map(refreshClipClassification),
-        },
-      ]),
+          {
+            id,
+            name: normalizeTeamName(id, team.name),
+            createdAt: team.createdAt ?? new Date().toISOString(),
+            accessKey: team.accessKey,
+            clips: (team.clips ?? []).map(refreshClipClassification),
+          },
+        ]),
     ),
   };
 }

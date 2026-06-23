@@ -18,7 +18,6 @@ import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 import {
   createClip,
   createImageClip,
-  createTeamBoardId,
   createTeamWorkspaceKey,
   getTeamIdFromWorkspace,
   getWorkspaceMode,
@@ -65,12 +64,6 @@ const MAX_SIDEBAR_WIDTH = 420;
 
 function clampSidebarWidth(value: number) {
   return Math.min(MAX_SIDEBAR_WIDTH, Math.max(MIN_SIDEBAR_WIDTH, Math.round(value)));
-}
-
-function createShareAccessKey() {
-  return typeof crypto !== "undefined" && "randomUUID" in crypto
-    ? crypto.randomUUID().replace(/-/g, "")
-    : `${Date.now()}${Math.random().toString(16).slice(2)}`;
 }
 
 function sortClipsByCreatedAt(clips: Clip[]) {
@@ -424,27 +417,13 @@ export default function Home() {
       selectWorkspace(createTeamWorkspaceKey(remoteBoard.id), remoteBoard.accessKey);
       setStatus(`${remoteBoard.name} 팀 보드를 만들었어요. 링크를 복사해 공유할 수 있습니다.`);
       return;
-    } catch {
-      setStatus("Supabase 팀 보드를 만들지 못했어요. 로컬 팀 보드로 임시 생성합니다.");
+    } catch (error) {
+      setStatus(
+        error instanceof Error
+          ? `Supabase 팀 보드를 만들지 못했어요: ${error.message}`
+          : "Supabase 팀 보드를 만들지 못했어요. 환경변수와 Supabase 설정을 확인해 주세요.",
+      );
     }
-
-    const id = createTeamBoardId();
-    const accessKey = createShareAccessKey();
-    setClipsByWorkspace((current) => ({
-      ...current,
-      teams: {
-        ...current.teams,
-        [id]: {
-          id,
-          name: trimmedName,
-          createdAt: new Date().toISOString(),
-          accessKey,
-          clips: [],
-        },
-      },
-    }));
-    selectWorkspace(createTeamWorkspaceKey(id), accessKey);
-    setStatus(`${trimmedName} 팀 보드를 만들었어요. 링크 기준으로 보드를 구분할 수 있어요.`);
   };
 
   const copyTeamLink = async () => {
@@ -482,6 +461,11 @@ export default function Home() {
   };
 
   const addClipObject = (clip: Clip) => {
+    if (workspace !== "personal" && !currentTeam?.accessKey) {
+      setStatus("팀 보드를 Supabase에서 불러오지 못해 저장할 수 없어요. 팀 링크를 다시 열어 주세요.");
+      return;
+    }
+
     if (clip.flagged) {
       const shouldSave = window.confirm(
         "비밀번호, 토큰, 카드번호 같은 민감정보일 수 있어요. ClipSpace에 저장할까요?",
