@@ -1,6 +1,7 @@
 export type ClipType = "text" | "link" | "code" | "contact" | "sensitive" | "image";
 
 export type WorkspaceMode = "personal" | "team";
+export type WorkspaceKey = "personal" | `team:${string}`;
 
 export type ClipSource = "paste" | "clipboard" | "manual";
 
@@ -39,4 +40,10 @@ export type WorkspaceCopy = {
   description: string;
   empty: string;
   status: string;
+};
+
+export type TeamBoard = {
+  id: string;
+  name: string;
+  createdAt: string;
 };

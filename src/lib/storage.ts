@@ -1,5 +1,5 @@
 import { refreshClipClassification } from "@/lib/clip";
-import type { Clip, WorkspaceMode } from "@/types/clip";
+import type { Clip, TeamBoard, WorkspaceKey, WorkspaceMode } from "@/types/clip";
 
 const WORKSPACE_KEY = "cliplog.workspace.v1";
 const LEGACY_STORAGE_KEYS: Record<WorkspaceMode, string> = {
@@ -11,11 +11,18 @@ const DB_VERSION = 1;
 const STORE_NAME = "workspace-state";
 const CLIPS_KEY = "clips";
 
-type StoredState = Record<WorkspaceMode, Clip[]>;
+type StoredTeamState = TeamBoard & {
+  clips: Clip[];
+};
+
+export type StoredState = {
+  personal: Clip[];
+  teams: Record<string, StoredTeamState>;
+};
 
 const emptyState: StoredState = {
   personal: [],
-  team: [],
+  teams: {},
 };
 
 function openCliplogDb() {
@@ -34,7 +41,7 @@ function openCliplogDb() {
 
 async function readStateFromIndexedDb() {
   const db = await openCliplogDb();
-  return new Promise<StoredState | null>((resolve, reject) => {
+  return new Promise<unknown | null>((resolve, reject) => {
     const transaction = db.transaction(STORE_NAME, "readonly");
     const store = transaction.objectStore(STORE_NAME);
     const request = store.get(CLIPS_KEY);
@@ -75,43 +82,96 @@ function loadLegacyClips(mode: WorkspaceMode) {
   }
 }
 
+function isV2State(state: unknown): state is StoredState {
+  return Boolean(
+    state &&
+      typeof state === "object" &&
+      "personal" in state &&
+      "teams" in state,
+  );
+}
+
+function normalizeTeamName(id: string, name?: string) {
+  return name?.trim() || `Team ${id.slice(0, 4).toUpperCase()}`;
+}
+
+function isWorkspaceKey(value: string | null): value is WorkspaceKey {
+  return value === "personal" || Boolean(value?.startsWith("team:"));
+}
+
 function normalizeState(state: StoredState) {
   return {
     personal: (state.personal ?? []).map(refreshClipClassification),
-    team: (state.team ?? []).map(refreshClipClassification),
+    teams: Object.fromEntries(
+      Object.entries(state.teams ?? {}).map(([id, team]) => [
+        id,
+        {
+          id,
+          name: normalizeTeamName(id, team.name),
+          createdAt: team.createdAt ?? new Date().toISOString(),
+          clips: (team.clips ?? []).map(refreshClipClassification),
+        },
+      ]),
+    ),
   };
 }
 
-export function loadWorkspaceMode() {
+export function loadWorkspaceMode(): WorkspaceKey {
   if (typeof window === "undefined") return "personal";
   const stored = window.localStorage.getItem(WORKSPACE_KEY);
-  return stored === "team" || stored === "personal" ? stored : "personal";
+  if (stored === "team") return "team:default";
+  return isWorkspaceKey(stored) ? stored : "personal";
 }
 
 export function hasStoredWorkspace() {
   if (typeof window === "undefined") return true;
-  return (
-    window.localStorage.getItem(WORKSPACE_KEY) === "team" ||
-    window.localStorage.getItem(WORKSPACE_KEY) === "personal"
-  );
+  const stored = window.localStorage.getItem(WORKSPACE_KEY);
+  return stored === "personal" || stored === "team" || Boolean(stored?.startsWith("team:"));
 }
 
-export async function loadStoredClips() {
+export async function loadStoredClips(): Promise<StoredState> {
   if (typeof window === "undefined") return emptyState;
 
   const indexedState = await readStateFromIndexedDb();
-  if (indexedState) return normalizeState(indexedState);
+  if (indexedState) {
+    if (isV2State(indexedState)) return normalizeState(indexedState);
+    const legacyState = indexedState as Partial<Record<WorkspaceMode, Clip[]>>;
+    return normalizeState({
+      personal: legacyState.personal ?? [],
+      teams: legacyState.team
+        ? {
+            default: {
+              id: "default",
+              name: "기본 팀",
+              createdAt: new Date().toISOString(),
+              clips: legacyState.team,
+            },
+          }
+        : {},
+    });
+  }
 
-  const legacyState = {
+  const legacyTeamClips = loadLegacyClips("team");
+  const legacyState: StoredState = {
     personal: loadLegacyClips("personal"),
-    team: loadLegacyClips("team"),
+    teams:
+      legacyTeamClips.length > 0
+        ? {
+            default: {
+              id: "default",
+              name: "기본 팀",
+              createdAt: new Date().toISOString(),
+              clips: legacyTeamClips,
+            },
+          }
+        : {},
   };
   await writeStateToIndexedDb(legacyState);
   return legacyState;
 }
 
 export async function saveWorkspaceState(
-  workspace: WorkspaceMode,
+  workspace: WorkspaceKey,
   clipsByWorkspace: StoredState,
 ) {
   window.localStorage.setItem(WORKSPACE_KEY, workspace);

@@ -17,6 +17,10 @@ import { WorkspaceHeader } from "@/components/WorkspaceHeader";
 import {
   createClip,
   createImageClip,
+  createTeamBoardId,
+  createTeamWorkspaceKey,
+  getTeamIdFromWorkspace,
+  getWorkspaceMode,
   makeId,
   normalizeContent,
   workspaceCopy,
@@ -27,9 +31,10 @@ import {
   loadStoredClips,
   loadWorkspaceMode,
   saveWorkspaceState,
+  type StoredState,
 } from "@/lib/storage";
 import { ui } from "@/styles/ui";
-import type { Clip, ClipImage, ClipSource, ClipType, WorkspaceMode } from "@/types/clip";
+import type { Clip, ClipImage, ClipSource, ClipType, TeamBoard, WorkspaceKey } from "@/types/clip";
 
 function isEditableTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false;
@@ -56,11 +61,11 @@ function clampSidebarWidth(value: number) {
 
 export default function Home() {
   const [isReady, setIsReady] = useState(false);
-  const [workspace, setWorkspace] = useState<WorkspaceMode>("personal");
+  const [workspace, setWorkspace] = useState<WorkspaceKey>("personal");
   const [hasSelectedWorkspace, setHasSelectedWorkspace] = useState(false);
-  const [clipsByWorkspace, setClipsByWorkspace] = useState<Record<WorkspaceMode, Clip[]>>(() => ({
+  const [clipsByWorkspace, setClipsByWorkspace] = useState<StoredState>(() => ({
     personal: [],
-    team: [],
+    teams: {},
   }));
   const [query, setQuery] = useState("");
   const [activeType, setActiveType] = useState<ClipType | "all">("all");
@@ -68,7 +73,19 @@ export default function Home() {
   const [manualInput, setManualInput] = useState("");
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH);
   const manualInputRef = useRef<HTMLTextAreaElement>(null);
-  const clips = clipsByWorkspace[workspace];
+  const currentTeamId = getTeamIdFromWorkspace(workspace);
+  const currentTeam = currentTeamId ? clipsByWorkspace.teams[currentTeamId] : null;
+  const teamBoards = useMemo<TeamBoard[]>(
+    () =>
+      Object.values(clipsByWorkspace.teams)
+        .map(({ id, name, createdAt }) => ({ id, name, createdAt }))
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    [clipsByWorkspace.teams],
+  );
+  const clips = useMemo(
+    () => (workspace === "personal" ? clipsByWorkspace.personal : (currentTeam?.clips ?? [])),
+    [clipsByWorkspace.personal, currentTeam?.clips, workspace],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -77,9 +94,28 @@ export default function Home() {
       try {
         const storedClips = await loadStoredClips();
         if (cancelled) return;
-        setWorkspace(loadWorkspaceMode());
-        setHasSelectedWorkspace(hasStoredWorkspace());
-        setClipsByWorkspace(storedClips);
+        const incomingTeamId = new URLSearchParams(window.location.search).get("team")?.trim();
+        const selectedWorkspace = incomingTeamId
+          ? createTeamWorkspaceKey(incomingTeamId)
+          : loadWorkspaceMode();
+        const nextStoredClips =
+          incomingTeamId && !storedClips.teams[incomingTeamId]
+            ? {
+                ...storedClips,
+                teams: {
+                  ...storedClips.teams,
+                  [incomingTeamId]: {
+                    id: incomingTeamId,
+                    name: `공유 팀 ${incomingTeamId.slice(0, 4).toUpperCase()}`,
+                    createdAt: new Date().toISOString(),
+                    clips: [],
+                  },
+                },
+              }
+            : storedClips;
+        setWorkspace(selectedWorkspace);
+        setHasSelectedWorkspace(Boolean(incomingTeamId) || hasStoredWorkspace());
+        setClipsByWorkspace(nextStoredClips);
         const storedSidebarWidth = Number(window.localStorage.getItem(LAYOUT_KEY));
         if (Number.isFinite(storedSidebarWidth) && storedSidebarWidth > 0) {
           setSidebarWidth(clampSidebarWidth(storedSidebarWidth));
@@ -112,18 +148,80 @@ export default function Home() {
     window.localStorage.setItem(LAYOUT_KEY, String(sidebarWidth));
   }, [isReady, sidebarWidth]);
 
-  const selectWorkspace = (mode: WorkspaceMode) => {
+  const selectWorkspace = (mode: WorkspaceKey) => {
     setWorkspace(mode);
     setHasSelectedWorkspace(true);
-    setStatus(`${workspaceCopy[mode].label} 보드로 전환했어요.`);
+    const modeKind = getWorkspaceMode(mode);
+    setStatus(`${workspaceCopy[modeKind].label} 보드로 전환했어요.`);
+    if (mode === "personal") {
+      window.history.replaceState(null, "", window.location.pathname);
+      return;
+    }
+    const teamId = getTeamIdFromWorkspace(mode);
+    if (teamId) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("team", teamId);
+      window.history.replaceState(null, "", `${url.pathname}${url.search}`);
+    }
   };
 
   const setWorkspaceClips = (updater: Clip[] | ((current: Clip[]) => Clip[])) => {
     setClipsByWorkspace((current) => {
+      if (workspace === "personal") {
+        const nextClips =
+          typeof updater === "function" ? updater(current.personal) : updater;
+        return { ...current, personal: nextClips };
+      }
+      const teamId = getTeamIdFromWorkspace(workspace);
+      if (!teamId) return current;
+      const team = current.teams[teamId] ?? {
+        id: teamId,
+        name: `공유 팀 ${teamId.slice(0, 4).toUpperCase()}`,
+        createdAt: new Date().toISOString(),
+        clips: [],
+      };
       const nextClips =
-        typeof updater === "function" ? updater(current[workspace]) : updater;
-      return { ...current, [workspace]: nextClips };
+        typeof updater === "function" ? updater(team.clips) : updater;
+      return {
+        ...current,
+        teams: {
+          ...current.teams,
+          [teamId]: { ...team, clips: nextClips },
+        },
+      };
     });
+  };
+
+  const createTeamBoard = (name: string) => {
+    const id = createTeamBoardId();
+    const trimmedName = name.trim() || `팀 보드 ${teamBoards.length + 1}`;
+    setClipsByWorkspace((current) => ({
+      ...current,
+      teams: {
+        ...current.teams,
+        [id]: {
+          id,
+          name: trimmedName,
+          createdAt: new Date().toISOString(),
+          clips: [],
+        },
+      },
+    }));
+    selectWorkspace(createTeamWorkspaceKey(id));
+    setStatus(`${trimmedName} 팀 보드를 만들었어요. 링크 기준으로 보드를 구분할 수 있어요.`);
+  };
+
+  const copyTeamLink = async () => {
+    const teamId = getTeamIdFromWorkspace(workspace);
+    if (!teamId) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("team", teamId);
+    try {
+      await navigator.clipboard.writeText(url.toString());
+      setStatus("팀 링크를 복사했어요. 같은 주소로 팀 보드 위치를 열 수 있습니다.");
+    } catch {
+      setStatus(`팀 링크: ${url.toString()}`);
+    }
   };
 
   const addClipObject = (clip: Clip) => {
@@ -155,7 +253,7 @@ export default function Home() {
     setStatus(
       clip.flagged
         ? "민감할 수 있는 내용이라 Review로 분류했어요."
-        : workspaceCopy[workspace].status,
+        : workspaceCopy[getWorkspaceMode(workspace)].status,
     );
   };
 
@@ -343,10 +441,20 @@ export default function Home() {
 
   return (
     <main className={ui.shell.app}>
-      {!hasSelectedWorkspace ? <WorkspaceChooser onSelect={selectWorkspace} /> : null}
+      {!hasSelectedWorkspace ? (
+        <WorkspaceChooser
+          onCreateTeamBoard={createTeamBoard}
+          onSelect={selectWorkspace}
+          teamBoards={teamBoards}
+        />
+      ) : null}
       <WorkspaceHeader
+        currentTeam={currentTeam}
+        onCopyTeamLink={() => void copyTeamLink()}
+        onCreateTeamBoard={createTeamBoard}
         onSelectWorkspace={selectWorkspace}
         stats={stats}
+        teamBoards={teamBoards}
         workspace={workspace}
       />
 

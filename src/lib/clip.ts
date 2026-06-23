@@ -1,4 +1,12 @@
-import type { Clip, ClipImage, ClipSource, ClipType, WorkspaceCopy, WorkspaceMode } from "@/types/clip";
+import type {
+  Clip,
+  ClipImage,
+  ClipSource,
+  ClipType,
+  WorkspaceCopy,
+  WorkspaceKey,
+  WorkspaceMode,
+} from "@/types/clip";
 
 export const workspaceCopy: Record<WorkspaceMode, WorkspaceCopy> = {
   personal: {
@@ -16,6 +24,26 @@ export const workspaceCopy: Record<WorkspaceMode, WorkspaceCopy> = {
     status: "팀 자료 보드에 저장했어요.",
   },
 };
+
+export function createTeamWorkspaceKey(teamId: string): WorkspaceKey {
+  return `team:${teamId}`;
+}
+
+export function getTeamIdFromWorkspace(workspace: WorkspaceKey) {
+  return workspace.startsWith("team:") ? workspace.slice("team:".length) : null;
+}
+
+export function getWorkspaceMode(workspace: WorkspaceKey): WorkspaceMode {
+  return workspace === "personal" ? "personal" : "team";
+}
+
+export function createTeamBoardId() {
+  const randomPart =
+    typeof crypto !== "undefined" && "randomUUID" in crypto
+      ? crypto.randomUUID().replace(/-/g, "").slice(0, 12)
+      : Math.random().toString(36).slice(2, 14);
+  return randomPart || Math.random().toString(36).slice(2, 14);
+}
 
 export const typeLabels: Record<ClipType, string> = {
   text: "텍스트",

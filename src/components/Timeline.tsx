@@ -1,13 +1,13 @@
-import { workspaceCopy } from "@/lib/clip";
+import { getWorkspaceMode, workspaceCopy } from "@/lib/clip";
 import { ui } from "@/styles/ui";
-import type { Clip, ClipImage, WorkspaceMode } from "@/types/clip";
+import type { Clip, ClipImage, WorkspaceKey } from "@/types/clip";
 import { ClipCard } from "./ClipCard";
 import { BrandIcon } from "./common";
 
 type TimelineProps = {
   clips: Clip[];
   groupedClips: Record<string, Clip[]>;
-  workspace: WorkspaceMode;
+  workspace: WorkspaceKey;
   onAddNote: (id: string, text: string, image?: ClipImage) => void;
   onClearWorkspace: () => void;
   onImportFromClipboard: () => void;
@@ -27,6 +27,8 @@ export function Timeline({
   onRemoveNote,
   onToggleFavorite,
 }: TimelineProps) {
+  const mode = getWorkspaceMode(workspace);
+
   return (
     <section
       className={ui.timeline.panel}
@@ -46,7 +48,7 @@ export function Timeline({
             className={ui.button.quiet}
             onClick={onClearWorkspace}
           >
-            {workspaceCopy[workspace].label} 보드 비우기
+            {workspaceCopy[mode].label} 보드 비우기
           </button>
         ) : null}
       </div>
@@ -56,7 +58,7 @@ export function Timeline({
           <div className="max-w-md">
             <BrandIcon className="mx-auto size-16 rounded-2xl" />
             <h3 className="mt-5 text-2xl font-semibold text-[#18211d]">
-              {workspaceCopy[workspace].empty}
+              {workspaceCopy[mode].empty}
             </h3>
             <p className="mt-3 text-sm leading-6 text-[#5f6673]">
               복사 후 가져오기 버튼을 누르거나 Ctrl/Cmd + V로 저장하세요.
