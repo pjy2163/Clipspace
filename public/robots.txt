@@ -1,0 +1,7 @@
+User-Agent: *
+Allow: /
+Disallow: /api/
+
+Sitemap: https://clipspace.co.kr/sitemap.xml
+
+#DaumWebMasterTool:a2376d337de95cd3e65466153548836b4de4b957165e7610c7b2b1df6b9d703d:KqMtrRaDniV96GOxiqaKXg==
