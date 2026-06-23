@@ -37,12 +37,12 @@ export function Sidebar({
         className={ui.button.paste}
         onClick={onImportFromClipboard}
       >
-        <span className="block text-sm font-semibold">여기를 누르면 붙여넣기가 추가됩니다</span>
-        <span className="mt-2 inline-flex rounded-md bg-white/10 px-2 py-1 text-xs font-semibold text-white">
-          Click to paste
+        <span className="block text-sm font-semibold">클립보드 가져오기</span>
+        <span className="mt-2 inline-flex rounded-md bg-white/10 px-2 py-1 text-xs font-semibold text-white/95">
+          Click or paste
         </span>
-        <span className="mt-2 block text-xs leading-5 text-[#d5e3dc]">
-          권한이 이미 허용돼 있으면 클릭만으로 바로 저장됩니다.
+        <span className="mt-2 block text-xs leading-5 text-[#d7dce5]">
+          버튼을 누르거나 이 화면에서 Ctrl/Cmd + V를 사용하세요.
         </span>
       </button>
 
@@ -81,7 +81,7 @@ export function Sidebar({
       </div>
 
       <div className={ui.panel.padded}>
-        <p className="text-sm font-semibold text-[#18211d]">분류</p>
+        <p className="text-sm font-semibold text-[#202124]">분류</p>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <FilterButton active={activeType === "all"} onClick={() => onSelectType("all")}>
             전체
@@ -99,12 +99,12 @@ export function Sidebar({
       </div>
 
       <div className={ui.panel.padded}>
-        <p className="text-sm font-semibold text-[#18211d]">Privacy first</p>
-        <ul className="mt-3 space-y-2 text-sm leading-6 text-[#64756d]">
-          <li>클립은 이 브라우저의 IndexedDB에 저장됩니다.</li>
-          <li>로그인, 서버 업로드, 원문 로그 수집은 아직 없습니다.</li>
-          <li>민감정보로 보이는 텍스트는 저장 전에 확인합니다.</li>
-          <li>이미지는 PNG, JPEG, WebP, GIF만 허용합니다.</li>
+        <p className="text-sm font-semibold text-[#202124]">Privacy first</p>
+        <ul className="mt-3 space-y-2 text-xs leading-5 text-[#5f6673]">
+          <li>브라우저 IndexedDB에 로컬 저장</li>
+          <li>로그인/서버 업로드 없음</li>
+          <li>민감정보 저장 전 확인</li>
+          <li>안전한 이미지 형식만 허용</li>
         </ul>
       </div>
     </aside>

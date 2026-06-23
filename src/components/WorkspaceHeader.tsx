@@ -7,7 +7,6 @@ type WorkspaceHeaderProps = {
   stats: {
     total: number;
     today: number;
-    flagged: number;
     images: number;
   };
   onSelectWorkspace: (mode: WorkspaceMode) => void;
@@ -19,30 +18,29 @@ export function WorkspaceHeader({
   onSelectWorkspace,
 }: WorkspaceHeaderProps) {
   return (
-    <section className="border-b border-[#d8dfda] bg-white">
-      <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-5 px-4 py-4 sm:px-6 xl:flex-row xl:items-center xl:justify-between">
-        <div className="space-y-2">
+    <section className="border-b border-[#e2e5ea] bg-white">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-4 px-4 py-3 sm:px-5 xl:flex-row xl:items-center xl:justify-between">
+        <div className="space-y-1.5">
           <div className="flex items-center gap-3">
-            <div className="grid size-9 place-items-center rounded-md bg-[#18211d] text-xs font-bold text-white">
+            <div className="grid size-9 place-items-center rounded-md bg-[#202124] text-xs font-semibold text-white">
               CL
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64756d]">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#7a828e]">
                 Cliplog
               </p>
-              <h1 className="text-2xl font-semibold tracking-normal text-[#18211d] sm:text-3xl">
+              <h1 className="text-2xl font-semibold tracking-normal text-[#202124]">
                 {workspaceCopy[workspace].title}
               </h1>
             </div>
           </div>
-          <p className="max-w-3xl text-sm leading-6 text-[#64756d]">
-            {workspaceCopy[workspace].description} 복사한 뒤 입력칸에 붙여넣고 Enter 또는
-            저장을 누르면 날짜별 기록으로 정리됩니다.
+          <p className="max-w-3xl text-sm leading-6 text-[#5f6673]">
+            {workspaceCopy[workspace].description} 클립은 로컬에 저장되고, 필요할 때만 공유됩니다.
           </p>
         </div>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="grid grid-cols-2 rounded-lg border border-[#d8dfda] bg-[#f8faf9] p-1">
+          <div className="grid grid-cols-2 rounded-lg border border-[#e2e5ea] bg-[#f6f7f9] p-1">
             <ModeButton
               active={workspace === "personal"}
               label="개인"
@@ -54,11 +52,10 @@ export function WorkspaceHeader({
               onClick={() => onSelectWorkspace("team")}
             />
           </div>
-          <div className="grid grid-cols-4 gap-2 rounded-lg border border-[#d8dfda] bg-[#f8faf9] p-2">
+          <div className="grid grid-cols-3 gap-2 rounded-lg border border-[#e2e5ea] bg-[#f6f7f9] p-2">
             <Stat label="전체" value={stats.total} />
             <Stat label="오늘" value={stats.today} />
             <Stat label="이미지" value={stats.images} />
-            <Stat label="검토" value={stats.flagged} />
           </div>
         </div>
       </div>

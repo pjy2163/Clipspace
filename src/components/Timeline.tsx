@@ -36,8 +36,8 @@ export function Timeline({
       <div className={ui.timeline.header}>
         <div>
           <h2 className="text-lg font-semibold text-[#18211d]">Timeline</h2>
-          <p className="mt-1 text-sm text-[#64756d]">
-            버튼을 누르면 현재 클립보드를 바로 저장합니다. 이미지 복사 후 붙여넣기도 기록됩니다.
+          <p className="mt-1 text-sm text-[#5f6673]">
+            복사한 텍스트, 링크, 코드, 이미지를 날짜별로 정리합니다.
           </p>
         </div>
         {clips.length > 0 ? (
@@ -59,9 +59,9 @@ export function Timeline({
             <h3 className="mt-5 text-2xl font-semibold text-[#18211d]">
               {workspaceCopy[workspace].empty}
             </h3>
-            <p className="mt-3 text-sm leading-6 text-[#64756d]">
-              텍스트, 링크, 코드, 이미지를 복사한 뒤 버튼을 누르거나 Ctrl/Cmd + V로 저장하세요.
-              권한이 막히면 입력칸에 붙여넣고 Enter로 저장할 수 있습니다.
+            <p className="mt-3 text-sm leading-6 text-[#5f6673]">
+              복사 후 가져오기 버튼을 누르거나 Ctrl/Cmd + V로 저장하세요.
+              권한이 막히면 직접 추가 입력칸을 사용할 수 있습니다.
             </p>
           </div>
         </div>
@@ -70,7 +70,7 @@ export function Timeline({
           {Object.entries(groupedClips).map(([day, dayClips]) => (
             <div key={day}>
               <div className={ui.timeline.dayHeader}>
-                <h3 className="text-sm font-semibold text-[#3f5a4e]">{day}</h3>
+                <h3 className="text-sm font-semibold text-[#354052]">{day}</h3>
                 <div className={ui.timeline.divider} />
                 <span className="text-xs text-[#788980]">{dayClips.length}개</span>
               </div>

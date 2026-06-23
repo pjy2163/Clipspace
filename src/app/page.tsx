@@ -1,7 +1,9 @@
 "use client";
 
 import {
+  type CSSProperties,
   type KeyboardEvent as ReactKeyboardEvent,
+  type PointerEvent as ReactPointerEvent,
   useEffect,
   useMemo,
   useRef,
@@ -43,6 +45,15 @@ function formatDay(date: string) {
   }).format(new Date(date));
 }
 
+const LAYOUT_KEY = "cliplog.layout.sidebarWidth.v1";
+const DEFAULT_SIDEBAR_WIDTH = 280;
+const MIN_SIDEBAR_WIDTH = 220;
+const MAX_SIDEBAR_WIDTH = 420;
+
+function clampSidebarWidth(value: number) {
+  return Math.min(MAX_SIDEBAR_WIDTH, Math.max(MIN_SIDEBAR_WIDTH, Math.round(value)));
+}
+
 export default function Home() {
   const [isReady, setIsReady] = useState(false);
   const [workspace, setWorkspace] = useState<WorkspaceMode>("personal");
@@ -55,6 +66,7 @@ export default function Home() {
   const [activeType, setActiveType] = useState<ClipType | "all">("all");
   const [status, setStatus] = useState("복사한 뒤 이 화면을 클릭하거나 Cmd/Ctrl + V를 누르세요.");
   const [manualInput, setManualInput] = useState("");
+  const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH);
   const manualInputRef = useRef<HTMLTextAreaElement>(null);
   const clips = clipsByWorkspace[workspace];
 
@@ -68,6 +80,10 @@ export default function Home() {
         setWorkspace(loadWorkspaceMode());
         setHasSelectedWorkspace(hasStoredWorkspace());
         setClipsByWorkspace(storedClips);
+        const storedSidebarWidth = Number(window.localStorage.getItem(LAYOUT_KEY));
+        if (Number.isFinite(storedSidebarWidth) && storedSidebarWidth > 0) {
+          setSidebarWidth(clampSidebarWidth(storedSidebarWidth));
+        }
       } catch {
         if (!cancelled) {
           setStatus("저장소를 불러오지 못했어요. 브라우저 저장 공간을 확인해 주세요.");
@@ -90,6 +106,11 @@ export default function Home() {
       setStatus("저장소에 기록하지 못했어요. 브라우저 저장 공간을 확인해 주세요.");
     });
   }, [clipsByWorkspace, isReady, workspace]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    window.localStorage.setItem(LAYOUT_KEY, String(sidebarWidth));
+  }, [isReady, sidebarWidth]);
 
   const selectWorkspace = (mode: WorkspaceMode) => {
     setWorkspace(mode);
@@ -254,7 +275,6 @@ export default function Home() {
       today: clips.filter(
         (clip) => new Date(clip.createdAt).toDateString() === new Date().toDateString(),
       ).length,
-      flagged: clips.filter((clip) => clip.flagged).length,
       images: clips.filter((clip) => clip.type === "image").length,
     };
   }, [clips]);
@@ -299,6 +319,26 @@ export default function Home() {
     );
   };
 
+  const startResizing = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    const startX = event.clientX;
+    const startWidth = sidebarWidth;
+
+    const handlePointerMove = (moveEvent: PointerEvent) => {
+      setSidebarWidth(clampSidebarWidth(startWidth + moveEvent.clientX - startX));
+    };
+    const handlePointerUp = () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+  };
+
   if (!isReady) return <AppLoading />;
 
   return (
@@ -310,7 +350,14 @@ export default function Home() {
         workspace={workspace}
       />
 
-      <section className={ui.shell.container}>
+      <section
+        className={ui.shell.container}
+        style={
+          {
+            "--workspace-columns": `${sidebarWidth}px 10px minmax(0, 1fr)`,
+          } as CSSProperties
+        }
+      >
         <Sidebar
           activeType={activeType}
           manualInput={manualInput}
@@ -324,6 +371,15 @@ export default function Home() {
           query={query}
           status={status}
         />
+
+        <button
+          aria-label="패널 크기 조절"
+          className={ui.resize.handle}
+          onPointerDown={startResizing}
+          type="button"
+        >
+          <span className={ui.resize.rail} />
+        </button>
 
         <Timeline
           clips={filteredClips}

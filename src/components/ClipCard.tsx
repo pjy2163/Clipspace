@@ -27,6 +27,7 @@ export function ClipCard({
   onToggleFavorite,
 }: ClipCardProps) {
   const [draftNote, setDraftNote] = useState("");
+  const [isMemoOpen, setIsMemoOpen] = useState(false);
   const [shareStatus, setShareStatus] = useState("");
   const meta = clipPreviewMeta(clip);
   const notes = clip.notes ?? [];
@@ -38,6 +39,7 @@ export function ClipCard({
     if (!draftNote.trim()) return;
     onAddNote(clip.id, draftNote);
     setDraftNote("");
+    setIsMemoOpen(true);
   };
   const handleNoteKeyDown = (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key !== "Enter" || event.shiftKey) return;
@@ -55,6 +57,7 @@ export function ClipCard({
       const caption = event.clipboardData.getData("text/plain") || draftNote;
       onAddNote(clip.id, caption, image);
       setDraftNote("");
+      setIsMemoOpen(true);
     } catch {
       onAddNote(clip.id, "이미지 메모를 읽지 못했어요.");
     }
@@ -75,47 +78,51 @@ export function ClipCard({
   return (
     <article className={ui.clip.card}>
       <div className={ui.clip.header}>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className={ui.clip.metaRow}>
             <span
-              className={`rounded-md border px-2 py-1 text-xs font-semibold ${typeTone[clip.type]}`}
+              className={`shrink-0 rounded-md border px-2 py-1 text-xs font-semibold ${typeTone[clip.type]}`}
             >
               {typeLabels[clip.type]}
             </span>
             <span className={ui.clip.category}>
               {clip.category}
             </span>
-            <span className="text-xs text-[#788980]">{formatTime(clip.createdAt)}</span>
           </div>
-          <h4 className="mt-3 break-words text-base font-semibold text-[#18211d]">
+          <h4 className="mt-2 break-words text-sm font-semibold leading-5 text-[#202124]">
             {clip.title}
           </h4>
-          <p className="mt-1 text-xs text-[#788980]">{meta}</p>
+          <p className="mt-1 truncate text-xs text-[#7a828e]">{meta}</p>
         </div>
-        <div className="flex shrink-0 flex-wrap gap-2">
-          <button
-            className={ui.button.neutral}
-            onClick={shareExternally}
-          >
-            공유
-          </button>
-          <button
-            className={ui.button.accent}
-            onClick={() => onToggleFavorite(clip.id)}
-          >
-            {clip.favorite ? "고정됨" : "고정"}
-          </button>
-          <button
-            className={ui.button.danger}
-            onClick={() => onRemove(clip.id)}
-          >
-            삭제
-          </button>
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
+          <div className="flex flex-nowrap gap-1">
+            <button
+              className={ui.button.neutral}
+              onClick={shareExternally}
+            >
+              공유
+            </button>
+            <button
+              className={ui.button.accent}
+              onClick={() => onToggleFavorite(clip.id)}
+            >
+              {clip.favorite ? "고정됨" : "고정"}
+            </button>
+            <button
+              className={ui.button.danger}
+              onClick={() => onRemove(clip.id)}
+            >
+              삭제
+            </button>
+          </div>
+          <span className="mt-3 text-right text-xs text-[#7a828e]">
+            {formatTime(clip.createdAt)}
+          </span>
         </div>
       </div>
-      {shareStatus ? <p className="mt-3 text-xs text-[#64756d]">{shareStatus}</p> : null}
+      {shareStatus ? <p className="mt-3 text-xs text-[#5f6673]">{shareStatus}</p> : null}
       {clip.flagged ? (
-        <p className="mt-3 rounded-md border border-[#f2ddb1] bg-[#fff8e9] px-3 py-2 text-sm text-[#76511d]">
+        <p className="mt-2 rounded-md border border-[#f1dfb8] bg-[#fff9ed] px-3 py-2 text-sm text-[#76511d]">
           민감정보일 수 있어요. 서버로 보내지 않고 로컬에만 저장됩니다.
         </p>
       ) : null}
@@ -126,64 +133,84 @@ export function ClipCard({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             alt={clip.title}
-            className="max-h-96 w-full object-contain"
+            className="max-h-56 w-full object-contain"
             src={clip.image.dataUrl}
           />
         </div>
       ) : (
         <div className={ui.clip.textFrame}>
-          <pre className={`whitespace-pre-wrap break-words p-4 ${contentClass}`}>
+          <pre className={`whitespace-pre-wrap break-words p-3 ${contentClass}`}>
             {clip.content}
           </pre>
         </div>
       )}
 
-      <label className="mt-4 block text-xs font-semibold uppercase tracking-[0.14em] text-[#788980]">
-        Memo
-      </label>
-      {notes.length > 0 ? (
-        <div className="mt-2 space-y-2">
-          {notes.map((note) => (
-            <div
-              className={ui.clip.memoItem}
-              key={note.id}
-            >
-              <div className="min-w-0 flex-1">
-                <p className="whitespace-pre-wrap break-words text-sm leading-6 text-[#344a40]">
-                  {note.text}
-                </p>
-                {note.image ? (
-                  <div className="mt-2 overflow-hidden rounded-md border border-[#e2e8e4] bg-white">
-                    {/* Data URL previews come from the local clipboard and cannot be optimized by Next Image. */}
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      alt={note.text || "Memo image"}
-                      className="max-h-64 w-full object-contain"
-                      src={note.image.dataUrl}
-                    />
+      <button
+        className="mt-3 flex w-full items-center justify-between gap-2 border-t border-[#eef1f5] pt-2 text-left"
+        onClick={() => setIsMemoOpen((current) => !current)}
+      >
+        <span className="flex shrink-0 items-center gap-1.5 text-xs font-semibold text-[#354052]">
+          <span>{isMemoOpen ? "-" : "+"}</span>
+          <span>메모</span>
+          {notes.length > 0 ? (
+            <span className="rounded-full bg-[#edf2fb] px-1.5 py-0.5 text-[11px] text-[#315fbd]">
+              {notes.length}
+            </span>
+          ) : null}
+        </span>
+        {notes.length > 0 && !isMemoOpen ? (
+          <span className="min-w-0 flex-1 truncate text-right text-xs text-[#7a828e]">
+            {notes[notes.length - 1].text || "이미지 메모"}
+          </span>
+        ) : null}
+      </button>
+      {isMemoOpen ? (
+        <>
+          {notes.length > 0 ? (
+            <div className="mt-2 max-h-40 space-y-2 overflow-auto">
+              {notes.map((note) => (
+                <div
+                  className={ui.clip.memoItem}
+                  key={note.id}
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="whitespace-pre-wrap break-words text-sm leading-5 text-[#3f4754]">
+                      {note.text}
+                    </p>
+                    {note.image ? (
+                      <div className="mt-2 overflow-hidden rounded-md border border-[#e2e8e4] bg-white">
+                        {/* Data URL previews come from the local clipboard and cannot be optimized by Next Image. */}
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          alt={note.text || "Memo image"}
+                          className="max-h-64 w-full object-contain"
+                          src={note.image.dataUrl}
+                        />
+                      </div>
+                    ) : null}
+                    <p className="mt-1 text-xs text-[#8a9a91]">{formatTime(note.createdAt)}</p>
                   </div>
-                ) : null}
-                <p className="mt-1 text-xs text-[#8a9a91]">{formatTime(note.createdAt)}</p>
-              </div>
-              <button
-                aria-label="메모 삭제"
-                className={ui.button.iconDanger}
-                onClick={() => onRemoveNote(clip.id, note.id)}
-              >
-                X
-              </button>
+                  <button
+                    aria-label="메모 삭제"
+                    className={ui.button.iconDanger}
+                    onClick={() => onRemoveNote(clip.id, note.id)}
+                  >
+                    X
+                  </button>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          ) : null}
+          <textarea
+            className={ui.form.memo}
+            placeholder="메모 입력 후 Enter로 추가, Shift+Enter로 줄바꿈"
+            value={draftNote}
+            onChange={(event) => setDraftNote(event.target.value)}
+            onKeyDown={handleNoteKeyDown}
+            onPaste={handleNotePaste}
+          />
+        </>
       ) : null}
-      <textarea
-        className={ui.form.memo}
-        placeholder="메모 입력 후 Enter로 추가, Shift+Enter로 줄바꿈"
-        value={draftNote}
-        onChange={(event) => setDraftNote(event.target.value)}
-        onKeyDown={handleNoteKeyDown}
-        onPaste={handleNotePaste}
-      />
     </article>
   );
 }
