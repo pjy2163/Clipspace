@@ -2,6 +2,7 @@
 
 import { type KeyboardEvent as ReactKeyboardEvent, useState } from "react";
 import { typeLabels, typeTone } from "@/lib/clip";
+import { ui } from "@/styles/ui";
 import type { Clip } from "@/types/clip";
 
 type ClipCardProps = {
@@ -38,16 +39,16 @@ export function ClipCard({
   };
 
   return (
-    <article className="min-w-0 rounded-lg border border-[#d8dfda] bg-[#fcfdfc] p-4 transition hover:border-[#b7c5bd] hover:shadow-sm">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <article className={ui.clip.card}>
+      <div className={ui.clip.header}>
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className={ui.clip.metaRow}>
             <span
               className={`rounded-md border px-2 py-1 text-xs font-semibold ${typeTone[clip.type]}`}
             >
               {typeLabels[clip.type]}
             </span>
-            <span className="rounded-md border border-[#e0e6e2] bg-white px-2 py-1 text-xs font-medium text-[#5d6f66]">
+            <span className={ui.clip.category}>
               {clip.category}
             </span>
             <span className="text-xs text-[#788980]">{formatTime(clip.createdAt)}</span>
@@ -59,13 +60,13 @@ export function ClipCard({
         </div>
         <div className="flex shrink-0 gap-2">
           <button
-            className="rounded-md border border-[#d5ded8] px-3 py-2 text-sm font-medium text-[#64756d] transition hover:border-[#2f7d5b] hover:text-[#2f7d5b]"
+            className={ui.button.accent}
             onClick={() => onToggleFavorite(clip.id)}
           >
             {clip.favorite ? "고정됨" : "고정"}
           </button>
           <button
-            className="rounded-md border border-[#ecd2d2] px-3 py-2 text-sm font-medium text-[#9a3d3d] transition hover:bg-[#fff4f4]"
+            className={ui.button.danger}
             onClick={() => onRemove(clip.id)}
           >
             삭제
@@ -79,7 +80,7 @@ export function ClipCard({
       ) : null}
 
       {clip.type === "image" && clip.image ? (
-        <div className="mt-4 overflow-hidden rounded-md border border-[#e2e8e4] bg-white">
+        <div className={ui.clip.imageFrame}>
           {/* Data URL previews come from the local clipboard and cannot be optimized by Next Image. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -89,7 +90,7 @@ export function ClipCard({
           />
         </div>
       ) : (
-        <div className="mt-4 max-h-72 min-h-24 overflow-auto rounded-md border border-[#e2e8e4] bg-white">
+        <div className={ui.clip.textFrame}>
           <pre className={`whitespace-pre-wrap break-words p-4 ${contentClass}`}>
             {clip.content}
           </pre>
@@ -103,7 +104,7 @@ export function ClipCard({
         <div className="mt-2 space-y-2">
           {notes.map((note) => (
             <div
-              className="flex items-start gap-2 rounded-md border border-[#dfe7e2] bg-white px-3 py-2"
+              className={ui.clip.memoItem}
               key={note.id}
             >
               <div className="min-w-0 flex-1">
@@ -114,7 +115,7 @@ export function ClipCard({
               </div>
               <button
                 aria-label="메모 삭제"
-                className="grid size-7 shrink-0 place-items-center rounded-md border border-[#e3cbc8] text-sm font-semibold text-[#9a3d3d] transition hover:bg-[#fff4f4]"
+                className={ui.button.iconDanger}
                 onClick={() => onRemoveNote(clip.id, note.id)}
               >
                 X
@@ -124,7 +125,7 @@ export function ClipCard({
         </div>
       ) : null}
       <textarea
-        className="mt-2 min-h-12 w-full resize-y rounded-md border border-[#d5ded8] bg-white px-3 py-2 text-sm leading-6 text-[#344a40] outline-none transition placeholder:text-[#9aaa9f] focus:border-[#2f7d5b] focus:ring-2 focus:ring-[#d9eadf]"
+        className={ui.form.memo}
         placeholder="메모 입력 후 Enter로 추가, Shift+Enter로 줄바꿈"
         value={draftNote}
         onChange={(event) => setDraftNote(event.target.value)}

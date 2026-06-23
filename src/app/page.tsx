@@ -25,6 +25,7 @@ import {
   loadWorkspaceMode,
   saveWorkspaceState,
 } from "@/lib/storage";
+import { ui } from "@/styles/ui";
 import type { Clip, ClipImage, ClipSource, ClipType, WorkspaceMode } from "@/types/clip";
 
 function isEditableTarget(target: EventTarget | null) {
@@ -304,7 +305,7 @@ export default function Home() {
   if (!isReady) return <AppLoading />;
 
   return (
-    <main className="min-h-screen bg-[#f4f6f5] text-[#18211d]">
+    <main className={ui.shell.app}>
       {!hasSelectedWorkspace ? <WorkspaceChooser onSelect={selectWorkspace} /> : null}
       <WorkspaceHeader
         onSelectWorkspace={selectWorkspace}
@@ -312,7 +313,7 @@ export default function Home() {
         workspace={workspace}
       />
 
-      <section className="mx-auto grid w-full max-w-[1600px] gap-4 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(280px,340px)_minmax(0,1fr)]">
+      <section className={ui.shell.container}>
         <Sidebar
           activeType={activeType}
           manualInput={manualInput}

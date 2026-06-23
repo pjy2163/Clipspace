@@ -1,4 +1,5 @@
 import { workspaceCopy } from "@/lib/clip";
+import { ui } from "@/styles/ui";
 import type { Clip, WorkspaceMode } from "@/types/clip";
 import { ClipCard } from "./ClipCard";
 
@@ -27,12 +28,12 @@ export function Timeline({
 }: TimelineProps) {
   return (
     <section
-      className="min-h-[640px] min-w-0 rounded-lg border border-[#d8dfda] bg-white shadow-sm"
+      className={ui.timeline.panel}
       onClick={(event) => {
         if (event.target === event.currentTarget) onImportFromClipboard();
       }}
     >
-      <div className="flex flex-col gap-3 border-b border-[#d8dfda] p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className={ui.timeline.header}>
         <div>
           <h2 className="text-lg font-semibold text-[#18211d]">Timeline</h2>
           <p className="mt-1 text-sm text-[#64756d]">
@@ -41,7 +42,7 @@ export function Timeline({
         </div>
         {clips.length > 0 ? (
           <button
-            className="rounded-md border border-[#d5ded8] px-3 py-2 text-sm font-medium text-[#64756d] transition hover:border-[#b4c0b8] hover:text-[#18211d]"
+            className={ui.button.quiet}
             onClick={onClearWorkspace}
           >
             {workspaceCopy[workspace].label} 보드 비우기
@@ -50,7 +51,7 @@ export function Timeline({
       </div>
 
       {clips.length === 0 ? (
-        <div className="grid min-h-[520px] place-items-center p-8 text-center">
+        <div className={ui.timeline.empty}>
           <div className="max-w-md">
             <div className="mx-auto grid size-14 place-items-center rounded-lg bg-[#eef5f1] text-base font-bold text-[#2f7d5b]">
               CL
@@ -65,15 +66,15 @@ export function Timeline({
           </div>
         </div>
       ) : (
-        <div className="space-y-8 p-3 sm:p-5">
+        <div className={ui.timeline.content}>
           {Object.entries(groupedClips).map(([day, dayClips]) => (
             <div key={day}>
-              <div className="mb-3 flex items-center gap-3">
+              <div className={ui.timeline.dayHeader}>
                 <h3 className="text-sm font-semibold text-[#3f5a4e]">{day}</h3>
-                <div className="h-px flex-1 bg-[#e3e9e5]" />
+                <div className={ui.timeline.divider} />
                 <span className="text-xs text-[#788980]">{dayClips.length}개</span>
               </div>
-              <div className="grid gap-3 2xl:grid-cols-2">
+              <div className={ui.timeline.grid}>
                 {dayClips.map((clip) => (
                   <ClipCard
                     clip={clip}
