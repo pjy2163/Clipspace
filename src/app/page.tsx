@@ -187,7 +187,7 @@ export default function Home() {
         const params = new URLSearchParams(window.location.search);
         const incomingTeamId = params.get("team")?.trim();
         const incomingTeamKey = params.get("key")?.trim();
-        const selectedWorkspace = incomingTeamId
+        let selectedWorkspace = incomingTeamId
           ? createTeamWorkspaceKey(incomingTeamId)
           : loadWorkspaceMode();
         let nextStoredClips = storedClips;
@@ -204,34 +204,12 @@ export default function Home() {
             };
             setStatus(`${remoteBoard.name} 팀 보드를 불러왔어요.`);
           } catch {
-            nextStoredClips = {
-              ...storedClips,
-              teams: {
-                ...storedClips.teams,
-                [incomingTeamId]: {
-                  id: incomingTeamId,
-                  name: `공유 팀 ${incomingTeamId.slice(0, 4).toUpperCase()}`,
-                  createdAt: new Date().toISOString(),
-                  accessKey: incomingTeamKey,
-                  clips: [],
-                },
-              },
-            };
+            selectedWorkspace = loadWorkspaceMode();
             setStatus("팀 링크를 불러오지 못했어요. 링크가 맞는지 확인해 주세요.");
           }
-        } else if (incomingTeamId && !storedClips.teams[incomingTeamId]) {
-          nextStoredClips = {
-            ...storedClips,
-            teams: {
-              ...storedClips.teams,
-              [incomingTeamId]: {
-                id: incomingTeamId,
-                name: `공유 팀 ${incomingTeamId.slice(0, 4).toUpperCase()}`,
-                createdAt: new Date().toISOString(),
-                clips: [],
-              },
-            },
-          };
+        } else if (incomingTeamId && !incomingTeamKey) {
+          selectedWorkspace = loadWorkspaceMode();
+          setStatus("팀 링크에 접근키가 없어요. 팀에서 링크를 다시 복사해 주세요.");
         }
         setWorkspace(selectedWorkspace);
         setHasSelectedWorkspace(Boolean(incomingTeamId) || hasStoredWorkspace());
@@ -363,7 +341,7 @@ export default function Home() {
     window.localStorage.setItem(LAYOUT_KEY, String(sidebarWidth));
   }, [isReady, sidebarWidth]);
 
-  const selectWorkspace = (mode: WorkspaceKey) => {
+  const selectWorkspace = (mode: WorkspaceKey, accessKeyOverride?: string) => {
     setWorkspace(mode);
     setHasSelectedWorkspace(true);
     setSharedTeamLink("");
@@ -377,7 +355,7 @@ export default function Home() {
     const teamId = getTeamIdFromWorkspace(mode);
     if (teamId) {
       const url = new URL(window.location.href);
-      const accessKey = clipsByWorkspace.teams[teamId]?.accessKey;
+      const accessKey = accessKeyOverride ?? clipsByWorkspace.teams[teamId]?.accessKey;
       url.searchParams.set("team", teamId);
       if (accessKey) url.searchParams.set("key", accessKey);
       else url.searchParams.delete("key");
@@ -443,7 +421,7 @@ export default function Home() {
           [remoteBoard.id]: remoteBoard,
         },
       }));
-      selectWorkspace(createTeamWorkspaceKey(remoteBoard.id));
+      selectWorkspace(createTeamWorkspaceKey(remoteBoard.id), remoteBoard.accessKey);
       setStatus(`${remoteBoard.name} 팀 보드를 만들었어요. 링크를 복사해 공유할 수 있습니다.`);
       return;
     } catch {
@@ -465,7 +443,7 @@ export default function Home() {
         },
       },
     }));
-    selectWorkspace(createTeamWorkspaceKey(id));
+    selectWorkspace(createTeamWorkspaceKey(id), accessKey);
     setStatus(`${trimmedName} 팀 보드를 만들었어요. 링크 기준으로 보드를 구분할 수 있어요.`);
   };
 
