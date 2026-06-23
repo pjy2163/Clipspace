@@ -7,7 +7,7 @@ import {
 } from "react";
 import { typeLabels, typeTone } from "@/lib/clip";
 import { getPastedImageFiles, readImageBlob } from "@/lib/image";
-import { shareClip } from "@/lib/share";
+import { copyClipToClipboard } from "@/lib/share";
 import { ui } from "@/styles/ui";
 import type { Clip, ClipImage } from "@/types/clip";
 
@@ -28,7 +28,7 @@ export function ClipCard({
 }: ClipCardProps) {
   const [draftNote, setDraftNote] = useState("");
   const [isMemoOpen, setIsMemoOpen] = useState(false);
-  const [shareStatus, setShareStatus] = useState("");
+  const [copyStatus, setCopyStatus] = useState("");
   const meta = clipPreviewMeta(clip);
   const notes = clip.notes ?? [];
   const contentClass =
@@ -62,16 +62,12 @@ export function ClipCard({
       onAddNote(clip.id, "이미지 메모를 읽지 못했어요.");
     }
   };
-  const shareExternally = async () => {
+  const copyClip = async () => {
     try {
-      const result = await shareClip(clip);
-      setShareStatus(
-        result === "shared"
-          ? "공유창을 열었어요."
-          : "공유를 지원하지 않아 클립 내용을 복사했어요.",
-      );
+      await copyClipToClipboard(clip);
+      setCopyStatus("클립 내용을 복사했어요.");
     } catch {
-      setShareStatus("공유가 취소되었거나 실패했어요.");
+      setCopyStatus("복사하지 못했어요. 브라우저 권한을 확인해 주세요.");
     }
   };
 
@@ -98,9 +94,9 @@ export function ClipCard({
           <div className="flex flex-nowrap gap-1">
             <button
               className={ui.button.neutral}
-              onClick={shareExternally}
+              onClick={copyClip}
             >
-              공유
+              복사
             </button>
             <button
               className={ui.button.accent}
@@ -120,7 +116,7 @@ export function ClipCard({
           </span>
         </div>
       </div>
-      {shareStatus ? <p className="mt-3 text-xs text-[#5f6673]">{shareStatus}</p> : null}
+      {copyStatus ? <p className="mt-3 text-xs text-[#5f6673]">{copyStatus}</p> : null}
       {clip.flagged ? (
         <p className="mt-2 rounded-md border border-[#f1dfb8] bg-[#fff9ed] px-3 py-2 text-sm text-[#76511d]">
           민감정보일 수 있어요. 서버로 보내지 않고 로컬에만 저장됩니다.

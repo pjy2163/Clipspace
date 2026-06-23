@@ -22,16 +22,8 @@ export function clipToMarkdown(clip: Clip) {
   return lines.join("\n");
 }
 
-export async function shareClip(clip: Clip) {
+export async function copyClipToClipboard(clip: Clip) {
   const markdown = clipToMarkdown(clip);
-  if (navigator.share) {
-    await navigator.share({
-      title: clip.title,
-      text: markdown,
-    });
-    return "shared";
-  }
-
   await navigator.clipboard.writeText(markdown);
   return "copied";
 }
