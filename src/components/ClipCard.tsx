@@ -7,6 +7,7 @@ import {
 } from "react";
 import { typeLabels, typeTone } from "@/lib/clip";
 import { getPastedImageFiles, readImageBlob } from "@/lib/image";
+import { shareClip } from "@/lib/share";
 import { ui } from "@/styles/ui";
 import type { Clip, ClipImage } from "@/types/clip";
 
@@ -26,6 +27,7 @@ export function ClipCard({
   onToggleFavorite,
 }: ClipCardProps) {
   const [draftNote, setDraftNote] = useState("");
+  const [shareStatus, setShareStatus] = useState("");
   const meta = clipPreviewMeta(clip);
   const notes = clip.notes ?? [];
   const contentClass =
@@ -57,6 +59,18 @@ export function ClipCard({
       onAddNote(clip.id, "이미지 메모를 읽지 못했어요.");
     }
   };
+  const shareExternally = async () => {
+    try {
+      const result = await shareClip(clip);
+      setShareStatus(
+        result === "shared"
+          ? "공유창을 열었어요."
+          : "공유를 지원하지 않아 클립 내용을 복사했어요.",
+      );
+    } catch {
+      setShareStatus("공유가 취소되었거나 실패했어요.");
+    }
+  };
 
   return (
     <article className={ui.clip.card}>
@@ -78,7 +92,13 @@ export function ClipCard({
           </h4>
           <p className="mt-1 text-xs text-[#788980]">{meta}</p>
         </div>
-        <div className="flex shrink-0 gap-2">
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <button
+            className={ui.button.neutral}
+            onClick={shareExternally}
+          >
+            공유
+          </button>
           <button
             className={ui.button.accent}
             onClick={() => onToggleFavorite(clip.id)}
@@ -93,6 +113,7 @@ export function ClipCard({
           </button>
         </div>
       </div>
+      {shareStatus ? <p className="mt-3 text-xs text-[#64756d]">{shareStatus}</p> : null}
       {clip.flagged ? (
         <p className="mt-3 rounded-md border border-[#f2ddb1] bg-[#fff8e9] px-3 py-2 text-sm text-[#76511d]">
           민감정보일 수 있어요. 서버로 보내지 않고 로컬에만 저장됩니다.

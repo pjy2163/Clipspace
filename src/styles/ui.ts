@@ -18,6 +18,8 @@ export const ui = {
       "rounded-md border border-[#d5ded8] px-3 py-2 text-sm font-medium text-[#64756d] transition hover:border-[#b4c0b8] hover:text-[#18211d]",
     accent:
       "rounded-md border border-[#d5ded8] px-3 py-2 text-sm font-medium text-[#64756d] transition hover:border-[#2f7d5b] hover:text-[#2f7d5b]",
+    neutral:
+      "rounded-md border border-[#d5ded8] px-3 py-2 text-sm font-medium text-[#43554d] transition hover:border-[#97aa9f] hover:bg-white",
     danger:
       "rounded-md border border-[#ecd2d2] px-3 py-2 text-sm font-medium text-[#9a3d3d] transition hover:bg-[#fff4f4]",
     iconDanger:
