@@ -8,7 +8,7 @@ const footerLinks = [
   { href: "/use-cases", label: "활용 사례" },
 ];
 
-const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "parangofsky@gamil.com";
+const contactEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "parangofsky@gmail.com";
 
 export function SiteFooter() {
   return (
