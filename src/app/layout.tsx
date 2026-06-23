@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 
 const siteUrl =
@@ -6,6 +7,7 @@ const siteUrl =
   (process.env.NODE_ENV === "production" ? "https://clipspace.co.kr" : "http://localhost:3000");
 const title = "ClipSpace";
 const description = "복사한 링크, 코드, 메모, 이미지를 한곳에 정리합니다.";
+const previewImage = "/clipspace-preview.png";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -20,14 +22,15 @@ export const metadata: Metadata = {
   openGraph: {
     title,
     description,
-    url: "/",
+    url: siteUrl,
     siteName: "ClipSpace",
     images: [
       {
-        url: "/opengraph-image.png",
+        url: previewImage,
         width: 1200,
         height: 630,
         alt: "ClipSpace clipboard workspace preview",
+        type: "image/png",
       },
     ],
     locale: "ko_KR",
@@ -37,7 +40,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title,
     description,
-    images: ["/twitter-image.png"],
+    images: [previewImage],
   },
 };
 
@@ -48,6 +51,18 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ko" className="h-full antialiased">
+      <head>
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-Y14L3YESDV" />
+        <Script id="google-analytics">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-Y14L3YESDV');
+          `}
+        </Script>
+      </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

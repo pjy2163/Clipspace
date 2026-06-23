@@ -5,8 +5,8 @@ const isDevelopment = process.env.NODE_ENV === "development";
 const nextConfig: NextConfig = {
   async headers() {
     const scriptSrc = isDevelopment
-      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
-      : "script-src 'self' 'unsafe-inline'";
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com"
+      : "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com";
 
     const securityHeaders = [
       {
@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
           "style-src 'self' 'unsafe-inline'",
           "img-src 'self' data: blob:",
           "font-src 'self' data:",
-          "connect-src 'self'",
+          "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com",
           "object-src 'none'",
           "base-uri 'self'",
           "form-action 'self'",
