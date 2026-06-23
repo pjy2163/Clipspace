@@ -59,22 +59,36 @@ export default function Home() {
   const clips = clipsByWorkspace[workspace];
 
   useEffect(() => {
-    const loadLocalState = window.setTimeout(() => {
-      setWorkspace(loadWorkspaceMode());
-      setHasSelectedWorkspace(hasStoredWorkspace());
-      setClipsByWorkspace({
-        personal: loadStoredClips("personal"),
-        team: loadStoredClips("team"),
-      });
-      setIsReady(true);
-    }, 0);
+    let cancelled = false;
 
-    return () => window.clearTimeout(loadLocalState);
+    const loadLocalState = async () => {
+      try {
+        const storedClips = await loadStoredClips();
+        if (cancelled) return;
+        setWorkspace(loadWorkspaceMode());
+        setHasSelectedWorkspace(hasStoredWorkspace());
+        setClipsByWorkspace(storedClips);
+      } catch {
+        if (!cancelled) {
+          setStatus("저장소를 불러오지 못했어요. 브라우저 저장 공간을 확인해 주세요.");
+        }
+      } finally {
+        if (!cancelled) setIsReady(true);
+      }
+    };
+
+    void loadLocalState();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
     if (!isReady) return;
-    saveWorkspaceState(workspace, clipsByWorkspace);
+    saveWorkspaceState(workspace, clipsByWorkspace).catch(() => {
+      setStatus("저장소에 기록하지 못했어요. 브라우저 저장 공간을 확인해 주세요.");
+    });
   }, [clipsByWorkspace, isReady, workspace]);
 
   const selectWorkspace = (mode: WorkspaceMode) => {
@@ -92,6 +106,16 @@ export default function Home() {
   };
 
   const addClipObject = (clip: Clip) => {
+    if (clip.flagged) {
+      const shouldSave = window.confirm(
+        "비밀번호, 토큰, 카드번호 같은 민감정보일 수 있어요. Cliplog에 저장할까요?",
+      );
+      if (!shouldSave) {
+        setStatus("민감할 수 있는 클립 저장을 취소했어요.");
+        return;
+      }
+    }
+
     const normalized = normalizeContent(`${clip.type}:${clip.content}:${clip.image?.dataUrl ?? ""}`);
     const duplicate = clips.some(
       (item) => normalizeContent(`${item.type}:${item.content}:${item.image?.dataUrl ?? ""}`) === normalized,
@@ -135,7 +159,7 @@ export default function Home() {
           );
           images.forEach((image) => addImageClip(image, "paste"));
         } catch {
-          setStatus("이미지를 읽지 못했어요. 다시 복사해서 붙여넣어 주세요.");
+          setStatus("지원하지 않는 이미지 형식이에요. PNG, JPEG, WebP, GIF만 저장됩니다.");
         }
         return;
       }

@@ -97,6 +97,16 @@ export function Sidebar({
       <div className={ui.panel.status}>
         {status}
       </div>
+
+      <div className={ui.panel.padded}>
+        <p className="text-sm font-semibold text-[#18211d]">Privacy first</p>
+        <ul className="mt-3 space-y-2 text-sm leading-6 text-[#64756d]">
+          <li>클립은 이 브라우저의 IndexedDB에 저장됩니다.</li>
+          <li>로그인, 서버 업로드, 원문 로그 수집은 아직 없습니다.</li>
+          <li>민감정보로 보이는 텍스트는 저장 전에 확인합니다.</li>
+          <li>이미지는 PNG, JPEG, WebP, GIF만 허용합니다.</li>
+        </ul>
+      </div>
     </aside>
   );
 }
