@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { type KeyboardEvent as ReactKeyboardEvent, useEffect, useMemo, useState } from "react";
 
 type ClipType = "text" | "link" | "code" | "contact" | "sensitive";
 type WorkspaceMode = "personal" | "team";
@@ -15,6 +15,7 @@ type Clip = {
   source: "paste" | "clipboard" | "manual";
   favorite: boolean;
   flagged: boolean;
+  note?: string;
 };
 
 const WORKSPACE_KEY = "cliplog.workspace.v1";
@@ -67,6 +68,51 @@ function normalizeContent(value: string) {
   return value.replace(/\s+/g, " ").trim();
 }
 
+function extractFirstUrl(content: string) {
+  const match = content.match(/https?:\/\/[^\s)]+|www\.[^\s)]+/i);
+  if (!match) return null;
+  return match[0].replace(/[.,;!?]+$/, "");
+}
+
+function titleCaseFromSlug(value: string) {
+  let decodedValue = value;
+  try {
+    decodedValue = decodeURIComponent(value);
+  } catch {
+    decodedValue = value;
+  }
+
+  const decoded = decodedValue
+    .replace(/\.[a-z0-9]{2,5}$/i, "")
+    .replace(/[-_+]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!decoded) return "";
+  return decoded
+    .split(" ")
+    .map((word) => (word.length > 2 ? `${word[0].toUpperCase()}${word.slice(1)}` : word))
+    .join(" ");
+}
+
+function inferLinkTitle(content: string) {
+  const extracted = extractFirstUrl(content);
+  if (!extracted) return "Saved link";
+
+  try {
+    const url = new URL(extracted.startsWith("www.") ? `https://${extracted}` : extracted);
+    const host = url.hostname.replace(/^www\./, "");
+    const pathParts = url.pathname
+      .split("/")
+      .map((part) => titleCaseFromSlug(part))
+      .filter((part) => part && !/^\d+$/.test(part));
+    const topic = pathParts.at(-1);
+    return topic ? `${topic} · ${host}` : host;
+  } catch {
+    return "Saved link";
+  }
+}
+
 function detectType(content: string): ClipType {
   const trimmed = content.trim();
   if (
@@ -82,7 +128,7 @@ function detectType(content: string): ClipType {
     return "contact";
   }
   if (isLikelyCode(trimmed)) return "code";
-  if (/https?:\/\/|www\./i.test(trimmed)) return "link";
+  if (extractFirstUrl(trimmed)) return "link";
   return "text";
 }
 
@@ -126,12 +172,7 @@ function makeTitle(content: string, type: ClipType) {
   const firstLine = content.trim().split(/\r?\n/).find(Boolean) ?? "Untitled";
   const cleaned = firstLine.replace(/^[-*#>\s]+/, "").trim();
   if (type === "link") {
-    try {
-      const url = new URL(cleaned.startsWith("www.") ? `https://${cleaned}` : cleaned);
-      return url.hostname.replace(/^www\./, "");
-    } catch {
-      return "Saved link";
-    }
+    return inferLinkTitle(cleaned);
   }
   if (type === "code") {
     const namedLine = content
@@ -331,6 +372,12 @@ export default function Home() {
     setManualInput("");
   };
 
+  const handleManualKeyDown = (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key !== "Enter" || event.shiftKey) return;
+    event.preventDefault();
+    addManualClip();
+  };
+
   const filteredClips = useMemo(() => {
     const lowered = query.toLowerCase();
     return clips.filter((clip) => {
@@ -338,7 +385,8 @@ export default function Home() {
         !lowered ||
         clip.content.toLowerCase().includes(lowered) ||
         clip.title.toLowerCase().includes(lowered) ||
-        clip.category.toLowerCase().includes(lowered);
+        clip.category.toLowerCase().includes(lowered) ||
+        (clip.note?.toLowerCase().includes(lowered) ?? false);
       const matchesType = activeType === "all" || clip.type === activeType;
       return matchesQuery && matchesType;
     });
@@ -372,6 +420,12 @@ export default function Home() {
 
   const removeClip = (id: string) => {
     setWorkspaceClips((current) => current.filter((clip) => clip.id !== id));
+  };
+
+  const updateClipNote = (id: string, note: string) => {
+    setWorkspaceClips((current) =>
+      current.map((clip) => (clip.id === id ? { ...clip, note } : clip)),
+    );
   };
 
   if (!isReady) {
@@ -449,6 +503,7 @@ export default function Home() {
               placeholder="여기에 붙여넣거나 메모를 입력하세요."
               value={manualInput}
               onChange={(event) => setManualInput(event.target.value)}
+              onKeyDown={handleManualKeyDown}
             />
             <button
               className="mt-3 w-full rounded-md bg-[#2f7d5b] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#27684c]"
@@ -547,6 +602,7 @@ export default function Home() {
                         clip={clip}
                         key={clip.id}
                         onRemove={removeClip}
+                        onUpdateNote={updateClipNote}
                         onToggleFavorite={toggleFavorite}
                       />
                     ))}
@@ -647,10 +703,12 @@ function ModeButton({
 function ClipCard({
   clip,
   onRemove,
+  onUpdateNote,
   onToggleFavorite,
 }: {
   clip: Clip;
   onRemove: (id: string) => void;
+  onUpdateNote: (id: string, note: string) => void;
   onToggleFavorite: (id: string) => void;
 }) {
   const meta = clipPreviewMeta(clip.content);
@@ -706,6 +764,15 @@ function ClipCard({
           {clip.content}
         </pre>
       </div>
+      <label className="mt-4 block text-xs font-semibold uppercase tracking-[0.14em] text-[#788980]">
+        Memo
+      </label>
+      <textarea
+        className="mt-2 min-h-20 w-full resize-y rounded-md border border-[#d5ded8] bg-white px-3 py-2 text-sm leading-6 text-[#344a40] outline-none transition placeholder:text-[#9aaa9f] focus:border-[#2f7d5b] focus:ring-2 focus:ring-[#d9eadf]"
+        placeholder="이 클립에 대한 메모를 남기세요."
+        value={clip.note ?? ""}
+        onChange={(event) => onUpdateNote(clip.id, event.target.value)}
+      />
     </article>
   );
 }
