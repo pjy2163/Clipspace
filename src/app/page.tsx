@@ -16,6 +16,13 @@ type Clip = {
   favorite: boolean;
   flagged: boolean;
   note?: string;
+  notes?: ClipNote[];
+};
+
+type ClipNote = {
+  id: string;
+  text: string;
+  createdAt: string;
 };
 
 const WORKSPACE_KEY = "cliplog.workspace.v1";
@@ -202,17 +209,33 @@ function createClip(content: string, source: Clip["source"]): Clip | null {
     source,
     favorite: false,
     flagged: type === "sensitive",
+    notes: [],
   };
 }
 
 function refreshClipClassification(clip: Clip): Clip {
   const type = detectType(clip.content);
+  const legacyNote = clip.note?.trim();
+  const notes = clip.notes ?? (
+    legacyNote
+      ? [
+          {
+            id: makeId(),
+            text: legacyNote,
+            createdAt: clip.createdAt,
+          },
+        ]
+      : []
+  );
+
   return {
     ...clip,
     title: makeTitle(clip.content, type),
     type,
     category: makeCategory(type, clip.content),
     flagged: type === "sensitive",
+    note: undefined,
+    notes,
   };
 }
 
@@ -386,7 +409,7 @@ export default function Home() {
         clip.content.toLowerCase().includes(lowered) ||
         clip.title.toLowerCase().includes(lowered) ||
         clip.category.toLowerCase().includes(lowered) ||
-        (clip.note?.toLowerCase().includes(lowered) ?? false);
+        (clip.notes?.some((note) => note.text.toLowerCase().includes(lowered)) ?? false);
       const matchesType = activeType === "all" || clip.type === activeType;
       return matchesQuery && matchesType;
     });
@@ -422,9 +445,31 @@ export default function Home() {
     setWorkspaceClips((current) => current.filter((clip) => clip.id !== id));
   };
 
-  const updateClipNote = (id: string, note: string) => {
+  const addClipNote = (id: string, text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
     setWorkspaceClips((current) =>
-      current.map((clip) => (clip.id === id ? { ...clip, note } : clip)),
+      current.map((clip) =>
+        clip.id === id
+          ? {
+              ...clip,
+              notes: [
+                ...(clip.notes ?? []),
+                { id: makeId(), text: trimmed, createdAt: new Date().toISOString() },
+              ],
+            }
+          : clip,
+      ),
+    );
+  };
+
+  const removeClipNote = (clipId: string, noteId: string) => {
+    setWorkspaceClips((current) =>
+      current.map((clip) =>
+        clip.id === clipId
+          ? { ...clip, notes: (clip.notes ?? []).filter((note) => note.id !== noteId) }
+          : clip,
+      ),
     );
   };
 
@@ -601,8 +646,9 @@ export default function Home() {
                       <ClipCard
                         clip={clip}
                         key={clip.id}
+                        onAddNote={addClipNote}
                         onRemove={removeClip}
-                        onUpdateNote={updateClipNote}
+                        onRemoveNote={removeClipNote}
                         onToggleFavorite={toggleFavorite}
                       />
                     ))}
@@ -702,20 +748,34 @@ function ModeButton({
 
 function ClipCard({
   clip,
+  onAddNote,
   onRemove,
-  onUpdateNote,
+  onRemoveNote,
   onToggleFavorite,
 }: {
   clip: Clip;
+  onAddNote: (id: string, text: string) => void;
   onRemove: (id: string) => void;
-  onUpdateNote: (id: string, note: string) => void;
+  onRemoveNote: (clipId: string, noteId: string) => void;
   onToggleFavorite: (id: string) => void;
 }) {
+  const [draftNote, setDraftNote] = useState("");
   const meta = clipPreviewMeta(clip.content);
+  const notes = clip.notes ?? [];
   const contentClass =
     clip.type === "code"
       ? "font-mono text-[13px] leading-6 text-[#2a332f]"
       : "text-sm leading-6 text-[#344a40]";
+  const submitNote = () => {
+    if (!draftNote.trim()) return;
+    onAddNote(clip.id, draftNote);
+    setDraftNote("");
+  };
+  const handleNoteKeyDown = (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key !== "Enter" || event.shiftKey) return;
+    event.preventDefault();
+    submitNote();
+  };
 
   return (
     <article className="min-w-0 rounded-lg border border-[#d8dfda] bg-[#fcfdfc] p-4 transition hover:border-[#b7c5bd] hover:shadow-sm">
@@ -767,11 +827,36 @@ function ClipCard({
       <label className="mt-4 block text-xs font-semibold uppercase tracking-[0.14em] text-[#788980]">
         Memo
       </label>
+      {notes.length > 0 ? (
+        <div className="mt-2 space-y-2">
+          {notes.map((note) => (
+            <div
+              className="flex items-start gap-2 rounded-md border border-[#dfe7e2] bg-white px-3 py-2"
+              key={note.id}
+            >
+              <div className="min-w-0 flex-1">
+                <p className="whitespace-pre-wrap break-words text-sm leading-6 text-[#344a40]">
+                  {note.text}
+                </p>
+                <p className="mt-1 text-xs text-[#8a9a91]">{formatTime(note.createdAt)}</p>
+              </div>
+              <button
+                aria-label="메모 삭제"
+                className="grid size-7 shrink-0 place-items-center rounded-md border border-[#e3cbc8] text-sm font-semibold text-[#9a3d3d] transition hover:bg-[#fff4f4]"
+                onClick={() => onRemoveNote(clip.id, note.id)}
+              >
+                X
+              </button>
+            </div>
+          ))}
+        </div>
+      ) : null}
       <textarea
-        className="mt-2 min-h-20 w-full resize-y rounded-md border border-[#d5ded8] bg-white px-3 py-2 text-sm leading-6 text-[#344a40] outline-none transition placeholder:text-[#9aaa9f] focus:border-[#2f7d5b] focus:ring-2 focus:ring-[#d9eadf]"
-        placeholder="이 클립에 대한 메모를 남기세요."
-        value={clip.note ?? ""}
-        onChange={(event) => onUpdateNote(clip.id, event.target.value)}
+        className="mt-2 min-h-12 w-full resize-y rounded-md border border-[#d5ded8] bg-white px-3 py-2 text-sm leading-6 text-[#344a40] outline-none transition placeholder:text-[#9aaa9f] focus:border-[#2f7d5b] focus:ring-2 focus:ring-[#d9eadf]"
+        placeholder="메모 입력 후 Enter로 추가, Shift+Enter로 줄바꿈"
+        value={draftNote}
+        onChange={(event) => setDraftNote(event.target.value)}
+        onKeyDown={handleNoteKeyDown}
       />
     </article>
   );
