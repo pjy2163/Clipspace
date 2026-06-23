@@ -35,13 +35,18 @@ export async function loadRemoteTeamBoard(id: string, accessKey: string) {
   return parseApiResponse<RemoteTeamBoard>(response);
 }
 
-export async function saveRemoteTeamClips(id: string, accessKey: string, clips: Clip[]) {
+export async function saveRemoteTeamClips(
+  id: string,
+  accessKey: string,
+  clips: Clip[],
+  deletedClipIds: string[] = [],
+) {
   const response = await fetch(`/api/team-boards/${encodeURIComponent(id)}/clips`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ accessKey, clips }),
+    body: JSON.stringify({ accessKey, clips, deletedClipIds }),
   });
   return parseApiResponse<{ ok: true }>(response);
 }

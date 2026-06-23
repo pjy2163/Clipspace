@@ -34,7 +34,12 @@ import {
   saveWorkspaceState,
   type StoredState,
 } from "@/lib/storage";
-import { createRemoteTeamBoard, loadRemoteTeamBoard, saveRemoteTeamClips } from "@/lib/team-api";
+import {
+  createRemoteTeamBoard,
+  loadRemoteTeamBoard,
+  type RemoteTeamBoard,
+  saveRemoteTeamClips,
+} from "@/lib/team-api";
 import { ui } from "@/styles/ui";
 import type { Clip, ClipImage, ClipSource, ClipType, TeamBoard, WorkspaceKey } from "@/types/clip";
 
@@ -66,6 +71,51 @@ function createShareAccessKey() {
   return typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID().replace(/-/g, "")
     : `${Date.now()}${Math.random().toString(16).slice(2)}`;
+}
+
+function sortClipsByCreatedAt(clips: Clip[]) {
+  return [...clips].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
+function getClipIds(clips: Clip[]) {
+  return new Set(clips.map((clip) => clip.id));
+}
+
+function getDeletedKnownClipIds(clips: Clip[], knownRemoteClipIds?: Set<string>) {
+  if (!knownRemoteClipIds) return [];
+  const currentClipIds = getClipIds(clips);
+  return Array.from(knownRemoteClipIds).filter((id) => !currentClipIds.has(id));
+}
+
+function mergeClips(localClips: Clip[], remoteClips: Clip[], knownRemoteClipIds?: Set<string>) {
+  const remoteClipIds = getClipIds(remoteClips);
+  const merged = new Map(remoteClips.map((clip) => [clip.id, clip]));
+  localClips.forEach((clip) => {
+    if (knownRemoteClipIds?.has(clip.id) && !remoteClipIds.has(clip.id)) return;
+    merged.set(clip.id, clip);
+  });
+  return sortClipsByCreatedAt(Array.from(merged.values()));
+}
+
+function haveSameClips(a: Clip[], b: Clip[]) {
+  return (
+    a.length === b.length &&
+    a.every((clip, index) => JSON.stringify(clip) === JSON.stringify(b[index]))
+  );
+}
+
+function mergeTeamBoard(
+  localTeam: StoredState["teams"][string] | undefined,
+  remoteTeam: StoredState["teams"][string],
+  knownRemoteClipIds?: Set<string>,
+) {
+  if (!localTeam) return remoteTeam;
+  return {
+    ...remoteTeam,
+    ...localTeam,
+    accessKey: localTeam.accessKey ?? remoteTeam.accessKey,
+    clips: mergeClips(localTeam.clips, remoteTeam.clips, knownRemoteClipIds),
+  };
 }
 
 async function copyText(value: string) {
@@ -108,9 +158,11 @@ export default function Home() {
   const [activeType, setActiveType] = useState<ClipType | "all">("all");
   const [status, setStatus] = useState("복사한 뒤 이 화면을 클릭하거나 Cmd/Ctrl + V를 누르세요.");
   const [sharedTeamLink, setSharedTeamLink] = useState("");
+  const [pendingTeamBoard, setPendingTeamBoard] = useState<RemoteTeamBoard | null>(null);
   const [manualInput, setManualInput] = useState("");
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_SIDEBAR_WIDTH);
   const manualInputRef = useRef<HTMLTextAreaElement>(null);
+  const syncedTeamClipIdsRef = useRef<Record<string, Set<string>>>({});
   const currentTeamId = getTeamIdFromWorkspace(workspace);
   const currentTeam = currentTeamId ? clipsByWorkspace.teams[currentTeamId] : null;
   const teamBoards = useMemo<TeamBoard[]>(
@@ -142,6 +194,7 @@ export default function Home() {
         if (incomingTeamId && incomingTeamKey) {
           try {
             const remoteBoard = await loadRemoteTeamBoard(incomingTeamId, incomingTeamKey);
+            syncedTeamClipIdsRef.current[incomingTeamId] = getClipIds(remoteBoard.clips);
             nextStoredClips = {
               ...storedClips,
               teams: {
@@ -214,10 +267,96 @@ export default function Home() {
 
   useEffect(() => {
     if (!isReady || workspace === "personal" || !currentTeamId || !currentTeam?.accessKey) return;
-    saveRemoteTeamClips(currentTeamId, currentTeam.accessKey, currentTeam.clips).catch(() => {
-      setStatus("팀 보드를 Supabase에 동기화하지 못했어요.");
-    });
+    const accessKey = currentTeam.accessKey;
+    let cancelled = false;
+
+    const syncTeamClips = async () => {
+      try {
+        const remoteBoard = await loadRemoteTeamBoard(currentTeamId, accessKey);
+        if (cancelled) return;
+        const knownRemoteClipIds = syncedTeamClipIdsRef.current[currentTeamId];
+        const mergedClips = mergeClips(currentTeam.clips, remoteBoard.clips, knownRemoteClipIds);
+        const deletedClipIds = getDeletedKnownClipIds(currentTeam.clips, knownRemoteClipIds);
+        await saveRemoteTeamClips(currentTeamId, accessKey, mergedClips, deletedClipIds);
+        syncedTeamClipIdsRef.current[currentTeamId] = getClipIds(mergedClips);
+        if (cancelled) return;
+        setPendingTeamBoard(null);
+        setClipsByWorkspace((current) => {
+          const localTeam = current.teams[currentTeamId];
+          if (!localTeam) return current;
+          const nextClips = mergeClips(localTeam.clips, remoteBoard.clips, knownRemoteClipIds);
+          if (
+            localTeam.name === remoteBoard.name &&
+            localTeam.createdAt === remoteBoard.createdAt &&
+            localTeam.accessKey === remoteBoard.accessKey &&
+            haveSameClips(localTeam.clips, nextClips)
+          ) {
+            return current;
+          }
+          return {
+            ...current,
+            teams: {
+              ...current.teams,
+              [currentTeamId]: {
+                ...localTeam,
+                name: remoteBoard.name,
+                createdAt: remoteBoard.createdAt,
+                accessKey: remoteBoard.accessKey,
+                clips: nextClips,
+              },
+            },
+          };
+        });
+      } catch {
+        if (!cancelled) setStatus("팀 보드를 Supabase에 동기화하지 못했어요.");
+      }
+    };
+
+    void syncTeamClips();
+
+    return () => {
+      cancelled = true;
+    };
   }, [currentTeam?.accessKey, currentTeam?.clips, currentTeamId, isReady, workspace]);
+
+  useEffect(() => {
+    if (!isReady || workspace === "personal" || !currentTeamId || !currentTeam?.accessKey) return;
+    const accessKey = currentTeam.accessKey;
+    let cancelled = false;
+
+    const refreshTeamBoard = async () => {
+      try {
+        const remoteBoard = await loadRemoteTeamBoard(currentTeamId, accessKey);
+        if (cancelled) return;
+        const knownRemoteClipIds = syncedTeamClipIdsRef.current[currentTeamId];
+        const mergedTeam = mergeTeamBoard(currentTeam, remoteBoard, knownRemoteClipIds);
+        if (haveSameClips(currentTeam.clips, mergedTeam.clips)) {
+          setPendingTeamBoard(null);
+        } else {
+          setPendingTeamBoard(remoteBoard);
+          setStatus("팀 보드에 새 변경사항이 있어요.");
+        }
+        syncedTeamClipIdsRef.current[currentTeamId] = getClipIds(remoteBoard.clips);
+      } catch {
+        if (!cancelled) setStatus("팀 보드를 새로 불러오지 못했어요. 공유 링크를 확인해 주세요.");
+      }
+    };
+
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") void refreshTeamBoard();
+    };
+
+    window.addEventListener("focus", refreshWhenVisible);
+    window.addEventListener("online", refreshWhenVisible);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener("focus", refreshWhenVisible);
+      window.removeEventListener("online", refreshWhenVisible);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
+  }, [currentTeam, currentTeam?.accessKey, currentTeamId, isReady, workspace]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -228,6 +367,7 @@ export default function Home() {
     setWorkspace(mode);
     setHasSelectedWorkspace(true);
     setSharedTeamLink("");
+    setPendingTeamBoard(null);
     const modeKind = getWorkspaceMode(mode);
     setStatus(`${workspaceCopy[modeKind].label} 보드로 전환했어요.`);
     if (mode === "personal") {
@@ -237,7 +377,10 @@ export default function Home() {
     const teamId = getTeamIdFromWorkspace(mode);
     if (teamId) {
       const url = new URL(window.location.href);
+      const accessKey = clipsByWorkspace.teams[teamId]?.accessKey;
       url.searchParams.set("team", teamId);
+      if (accessKey) url.searchParams.set("key", accessKey);
+      else url.searchParams.delete("key");
       window.history.replaceState(null, "", `${url.pathname}${url.search}`);
     }
   };
@@ -268,6 +411,25 @@ export default function Home() {
         },
       };
     });
+  };
+
+  const applyPendingTeamUpdates = () => {
+    if (!pendingTeamBoard || !currentTeamId || pendingTeamBoard.id !== currentTeamId) return;
+    const remoteBoard = pendingTeamBoard;
+    const knownRemoteClipIds = syncedTeamClipIdsRef.current[currentTeamId];
+    setClipsByWorkspace((current) => {
+      const localTeam = current.teams[currentTeamId];
+      return {
+        ...current,
+        teams: {
+          ...current.teams,
+          [currentTeamId]: mergeTeamBoard(localTeam, remoteBoard, knownRemoteClipIds),
+        },
+      };
+    });
+    syncedTeamClipIdsRef.current[currentTeamId] = getClipIds(remoteBoard.clips);
+    setPendingTeamBoard(null);
+    setStatus("팀 보드 변경사항을 불러왔어요.");
   };
 
   const createTeamBoard = async (name: string) => {
@@ -587,7 +749,9 @@ export default function Home() {
           activeType={activeType}
           manualInput={manualInput}
           manualInputRef={manualInputRef}
+          hasTeamUpdates={Boolean(pendingTeamBoard && pendingTeamBoard.id === currentTeamId)}
           onAddManualClip={addManualClip}
+          onApplyTeamUpdates={applyPendingTeamUpdates}
           onCopySharedTeamLink={() => void copySharedTeamLink()}
           onImportFromClipboard={importFromClipboard}
           onManualInputChange={setManualInput}

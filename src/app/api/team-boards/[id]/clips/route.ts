@@ -6,7 +6,24 @@ export const runtime = "nodejs";
 type SaveClipsRequest = {
   accessKey?: string;
   clips?: Clip[];
+  deletedClipIds?: string[];
 };
+
+function mapClipToRow(clip: Clip, boardId: string) {
+  return {
+    id: clip.id,
+    board_id: boardId,
+    content: clip.content,
+    title: clip.title,
+    type: clip.type,
+    category: clip.category,
+    favorite: clip.favorite,
+    flagged: clip.flagged,
+    image: clip.image ?? null,
+    notes: clip.notes ?? [],
+    created_at: clip.createdAt,
+  };
+}
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -30,29 +47,26 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return Response.json({ error: "Invalid team access key." }, { status: 403 });
     }
 
-    const clips = body.clips ?? [];
-    const { error: deleteError } = await supabase.from("team_clips").delete().eq("board_id", id);
-    if (deleteError) {
-      return Response.json({ error: deleteError.message }, { status: 500 });
+    const deletedClipIds = [...new Set(body.deletedClipIds ?? [])];
+    if (deletedClipIds.length > 0) {
+      const { error: deleteError } = await supabase
+        .from("team_clips")
+        .delete()
+        .eq("board_id", id)
+        .in("id", deletedClipIds);
+      if (deleteError) {
+        return Response.json({ error: deleteError.message }, { status: 500 });
+      }
     }
 
+    const clips = body.clips ?? [];
     if (clips.length > 0) {
-      const rows = clips.map((clip) => ({
-        id: clip.id,
-        board_id: id,
-        content: clip.content,
-        title: clip.title,
-        type: clip.type,
-        category: clip.category,
-        favorite: clip.favorite,
-        flagged: clip.flagged,
-        image: clip.image ?? null,
-        notes: clip.notes ?? [],
-        created_at: clip.createdAt,
-      }));
-      const { error: insertError } = await supabase.from("team_clips").insert(rows);
-      if (insertError) {
-        return Response.json({ error: insertError.message }, { status: 500 });
+      const rows = clips.map((clip) => mapClipToRow(clip, id));
+      const { error: upsertError } = await supabase.from("team_clips").upsert(rows, {
+        onConflict: "id",
+      });
+      if (upsertError) {
+        return Response.json({ error: upsertError.message }, { status: 500 });
       }
     }
 

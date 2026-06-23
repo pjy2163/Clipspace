@@ -10,9 +10,11 @@ type SidebarProps = {
   query: string;
   status: string;
   sharedTeamLink?: string;
+  hasTeamUpdates?: boolean;
   manualInputRef: RefObject<HTMLTextAreaElement | null>;
   onAddManualClip: () => void;
   onImportFromClipboard: () => void;
+  onApplyTeamUpdates?: () => void;
   onCopySharedTeamLink?: () => void;
   onManualInputChange: (value: string) => void;
   onManualKeyDown: (event: ReactKeyboardEvent<HTMLTextAreaElement>) => void;
@@ -25,9 +27,11 @@ export function Sidebar({
   manualInput,
   query,
   sharedTeamLink,
+  hasTeamUpdates,
   status,
   manualInputRef,
   onAddManualClip,
+  onApplyTeamUpdates,
   onImportFromClipboard,
   onCopySharedTeamLink,
   onManualInputChange,
@@ -100,6 +104,15 @@ export function Sidebar({
 
       <div className={ui.panel.status}>
         <p>{status}</p>
+        {hasTeamUpdates && onApplyTeamUpdates ? (
+          <button
+            className="mt-3 w-full rounded-md border border-[#adc4ee] bg-white px-3 py-2 text-xs font-semibold text-[#315fbd] transition hover:bg-[#eef4ff]"
+            onClick={onApplyTeamUpdates}
+            type="button"
+          >
+            새 변경사항 불러오기
+          </button>
+        ) : null}
         {sharedTeamLink ? (
           <div className="mt-3 space-y-2 rounded-md border border-[#c8d5eb] bg-white p-2">
             <a
