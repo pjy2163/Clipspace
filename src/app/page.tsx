@@ -11,6 +11,7 @@ import {
 } from "react";
 import { AppLoading } from "@/components/AppLoading";
 import { Sidebar } from "@/components/Sidebar";
+import { SiteFooter } from "@/components/SiteFooter";
 import { Timeline } from "@/components/Timeline";
 import { WorkspaceChooser } from "@/components/WorkspaceChooser";
 import { WorkspaceHeader } from "@/components/WorkspaceHeader";
@@ -486,7 +487,7 @@ export default function Home() {
   if (!isReady) return <AppLoading />;
 
   return (
-    <main className={ui.shell.app}>
+    <main className={ui.shell.app} id="top">
       {!hasSelectedWorkspace ? (
         <WorkspaceChooser
           onCreateTeamBoard={createTeamBoard}
@@ -547,6 +548,7 @@ export default function Home() {
           workspace={workspace}
         />
       </section>
+      <SiteFooter />
     </main>
   );
 }

@@ -11,14 +11,14 @@ import type {
 export const workspaceCopy: Record<WorkspaceMode, WorkspaceCopy> = {
   personal: {
     label: "개인",
-    title: "Personal clipboard",
+    title: "개인 클립보드",
     description: "내가 복사한 메모, 코드, 링크를 혼자 쓰는 작업 로그로 정리합니다.",
     empty: "개인 클립보드가 비어 있어요",
     status: "개인 보드에 저장했어요.",
   },
   team: {
     label: "팀",
-    title: "Team research board",
+    title: "팀 자료 보드",
     description: "팀 프로젝트에서 같이 볼 자료, 레퍼런스, 코드 조각을 모으는 공간입니다.",
     empty: "팀 자료 보드가 비어 있어요",
     status: "팀 자료 보드에 저장했어요.",

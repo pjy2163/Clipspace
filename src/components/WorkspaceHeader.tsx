@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createTeamWorkspaceKey, getWorkspaceMode, workspaceCopy } from "@/lib/clip";
 import type { TeamBoard, WorkspaceKey } from "@/types/clip";
 import { BrandIcon, ModeButton, Stat } from "./common";
@@ -29,39 +30,50 @@ export function WorkspaceHeader({
   const title = workspace === "personal" ? workspaceCopy.personal.title : currentTeam?.name ?? "Team board";
   const description =
     workspace === "personal"
-      ? workspaceCopy.personal.description
-      : "팀 링크 기준으로 자료, 레퍼런스, 코드 조각을 모으는 공간입니다.";
+      ? "내가 복사한 메모, 코드, 링크를 혼자 쓰는 작업 로그로 정리합니다."
+      : "팀 링크로 모은 자료, 레퍼런스, 코드 조각을 함께 보는 공간으로 정리합니다.";
+  const infoLinks = [
+    { href: "/about", label: "소개" },
+    { href: "/guide", label: "사용법" },
+    { href: "/privacy", label: "개인정보" },
+    { href: "/use-cases", label: "활용 사례" },
+  ];
 
   return (
     <section className="border-b border-[#e2e5ea] bg-white">
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-4 px-4 py-3 sm:px-5 xl:flex-row xl:items-center xl:justify-between">
-        <div className="space-y-1.5">
-          <div className="flex items-center gap-3">
-            <button
-              aria-label="Cliplog 새로고침"
-              className="rounded-2xl transition hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-[#315fbd] focus:ring-offset-2"
-              onClick={() => window.location.reload()}
-              title="새로고침"
-              type="button"
-            >
-              <BrandIcon className="size-12 rounded-2xl" />
-            </button>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#7a828e]">
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col px-4 sm:px-5">
+        <div className="flex min-h-20 flex-col gap-4 border-b border-[#edf0f4] py-4 lg:flex-row lg:items-center lg:justify-between">
+          <button
+            aria-label="Cliplog 새로고침"
+            className="flex w-fit items-center gap-3 rounded-xl transition hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-[#315fbd] focus:ring-offset-2"
+            onClick={() => window.location.reload()}
+            title="새로고침"
+            type="button"
+          >
+            <BrandIcon className="size-11 rounded-xl" />
+            <span className="text-left">
+              <span className="block text-sm font-semibold uppercase tracking-[0.22em] text-[#7a828e]">
                 Cliplog
-              </p>
-              <h1 className="text-2xl font-semibold tracking-normal text-[#202124]">
-                {title}
-              </h1>
-            </div>
-          </div>
-          <p className="max-w-3xl text-sm leading-6 text-[#5f6673]">
-            {description} 클립은 로컬에 저장되고, 필요할 때만 공유됩니다.
-          </p>
-        </div>
+              </span>
+            </span>
+          </button>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <div className="flex flex-wrap items-center gap-1 rounded-lg border border-[#e2e5ea] bg-[#f6f7f9] p-1">
+          <nav
+            aria-label="Cliplog 안내 페이지"
+            className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[#202124] lg:justify-center"
+          >
+            {infoLinks.map((item) => (
+              <Link
+                className="rounded-md px-3 py-2 transition hover:bg-[#f0f3f8] hover:text-[#315fbd]"
+                href={item.href}
+                key={item.href}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="flex w-fit flex-nowrap items-center gap-1 rounded-full border border-[#e2e5ea] bg-[#f6f7f9] p-1">
             <ModeButton
               active={mode === "personal"}
               label="개인"
@@ -89,7 +101,7 @@ export function WorkspaceHeader({
               </select>
             ) : null}
             <button
-              className="rounded-md px-3 py-2 text-sm font-semibold text-[#5f6673] transition hover:text-[#202124]"
+              className="whitespace-nowrap rounded-full px-3 py-2 text-sm font-semibold text-[#5f6673] transition hover:bg-white hover:text-[#202124]"
               onClick={() => onCreateTeamBoard("")}
               type="button"
             >
@@ -105,7 +117,24 @@ export function WorkspaceHeader({
               </button>
             ) : null}
           </div>
-          <div className="grid grid-cols-3 gap-2 rounded-lg border border-[#e2e5ea] bg-[#f6f7f9] p-2">
+        </div>
+
+        <div className="flex flex-col gap-4 py-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#7a828e]">
+              {mode === "personal" ? "Personal" : "Team"}
+            </p>
+            <h1 className="text-3xl font-semibold tracking-normal text-[#202124] sm:text-4xl">
+              {title}
+            </h1>
+            <p className="max-w-3xl text-sm leading-6 text-[#5f6673] sm:text-base">
+              <span>{description}</span>
+              <br />
+              <span>클립은 로컬에 저장되고, 팀 보드에서 필요할 때만 공유됩니다.</span>
+            </p>
+          </div>
+
+          <div className="grid w-fit grid-cols-3 gap-2 rounded-lg border border-[#e2e5ea] bg-[#f6f7f9] p-2">
             <Stat label="전체" value={stats.total} />
             <Stat label="오늘" value={stats.today} />
             <Stat label="이미지" value={stats.images} />
