@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.NODE_ENV === "production" ? "https://clipspace.co.kr" : "http://localhost:3000");
 const title = "ClipSpace";
 const description = "복사한 링크, 코드, 메모, 이미지를 한곳에 정리합니다.";
 
