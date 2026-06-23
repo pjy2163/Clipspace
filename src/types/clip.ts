@@ -4,17 +4,18 @@ export type WorkspaceMode = "personal" | "team";
 
 export type ClipSource = "paste" | "clipboard" | "manual";
 
-export type ClipNote = {
-  id: string;
-  text: string;
-  createdAt: string;
-};
-
 export type ClipImage = {
   dataUrl: string;
   mimeType: string;
   fileName?: string;
   size?: number;
+};
+
+export type ClipNote = {
+  id: string;
+  text: string;
+  createdAt: string;
+  image?: ClipImage;
 };
 
 export type Clip = {

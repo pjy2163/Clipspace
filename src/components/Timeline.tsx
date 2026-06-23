@@ -1,13 +1,13 @@
 import { workspaceCopy } from "@/lib/clip";
 import { ui } from "@/styles/ui";
-import type { Clip, WorkspaceMode } from "@/types/clip";
+import type { Clip, ClipImage, WorkspaceMode } from "@/types/clip";
 import { ClipCard } from "./ClipCard";
 
 type TimelineProps = {
   clips: Clip[];
   groupedClips: Record<string, Clip[]>;
   workspace: WorkspaceMode;
-  onAddNote: (id: string, text: string) => void;
+  onAddNote: (id: string, text: string, image?: ClipImage) => void;
   onClearWorkspace: () => void;
   onImportFromClipboard: () => void;
   onRemove: (id: string) => void;

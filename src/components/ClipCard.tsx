@@ -1,13 +1,18 @@
 "use client";
 
-import { type KeyboardEvent as ReactKeyboardEvent, useState } from "react";
+import {
+  type ClipboardEvent as ReactClipboardEvent,
+  type KeyboardEvent as ReactKeyboardEvent,
+  useState,
+} from "react";
 import { typeLabels, typeTone } from "@/lib/clip";
+import { getPastedImageFiles, readImageBlob } from "@/lib/image";
 import { ui } from "@/styles/ui";
-import type { Clip } from "@/types/clip";
+import type { Clip, ClipImage } from "@/types/clip";
 
 type ClipCardProps = {
   clip: Clip;
-  onAddNote: (id: string, text: string) => void;
+  onAddNote: (id: string, text: string, image?: ClipImage) => void;
   onRemove: (id: string) => void;
   onRemoveNote: (clipId: string, noteId: string) => void;
   onToggleFavorite: (id: string) => void;
@@ -36,6 +41,21 @@ export function ClipCard({
     if (event.key !== "Enter" || event.shiftKey) return;
     event.preventDefault();
     submitNote();
+  };
+  const handleNotePaste = async (event: ReactClipboardEvent<HTMLTextAreaElement>) => {
+    const imageFiles = getPastedImageFiles(event);
+    if (imageFiles.length === 0) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    try {
+      const image = await readImageBlob(imageFiles[0], imageFiles[0].name || undefined);
+      const caption = event.clipboardData.getData("text/plain") || draftNote;
+      onAddNote(clip.id, caption, image);
+      setDraftNote("");
+    } catch {
+      onAddNote(clip.id, "이미지 메모를 읽지 못했어요.");
+    }
   };
 
   return (
@@ -111,6 +131,17 @@ export function ClipCard({
                 <p className="whitespace-pre-wrap break-words text-sm leading-6 text-[#344a40]">
                   {note.text}
                 </p>
+                {note.image ? (
+                  <div className="mt-2 overflow-hidden rounded-md border border-[#e2e8e4] bg-white">
+                    {/* Data URL previews come from the local clipboard and cannot be optimized by Next Image. */}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      alt={note.text || "Memo image"}
+                      className="max-h-64 w-full object-contain"
+                      src={note.image.dataUrl}
+                    />
+                  </div>
+                ) : null}
                 <p className="mt-1 text-xs text-[#8a9a91]">{formatTime(note.createdAt)}</p>
               </div>
               <button
@@ -130,6 +161,7 @@ export function ClipCard({
         value={draftNote}
         onChange={(event) => setDraftNote(event.target.value)}
         onKeyDown={handleNoteKeyDown}
+        onPaste={handleNotePaste}
       />
     </article>
   );

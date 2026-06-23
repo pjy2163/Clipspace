@@ -19,6 +19,7 @@ import {
   normalizeContent,
   workspaceCopy,
 } from "@/lib/clip";
+import { getPastedImageFiles, readImageBlob } from "@/lib/image";
 import {
   hasStoredWorkspace,
   loadStoredClips,
@@ -40,34 +41,6 @@ function formatDay(date: string) {
     day: "numeric",
     weekday: "short",
   }).format(new Date(date));
-}
-
-function readImageBlob(blob: Blob, fileName?: string) {
-  return new Promise<ClipImage>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.addEventListener("load", () => {
-      if (typeof reader.result !== "string") {
-        reject(new Error("Unable to read image"));
-        return;
-      }
-      resolve({
-        dataUrl: reader.result,
-        mimeType: blob.type || "image/png",
-        fileName,
-        size: blob.size,
-      });
-    });
-    reader.addEventListener("error", () => reject(reader.error));
-    reader.readAsDataURL(blob);
-  });
-}
-
-function getPastedImageFiles(event: ClipboardEvent) {
-  const items = Array.from(event.clipboardData?.items ?? []);
-  return items
-    .filter((item) => item.kind === "file" && item.type.startsWith("image/"))
-    .map((item) => item.getAsFile())
-    .filter((file): file is File => Boolean(file));
 }
 
 export default function Home() {
@@ -274,9 +247,9 @@ export default function Home() {
     setWorkspaceClips((current) => current.filter((clip) => clip.id !== id));
   };
 
-  const addClipNote = (id: string, text: string) => {
+  const addClipNote = (id: string, text: string, image?: ClipImage) => {
     const trimmed = text.trim();
-    if (!trimmed) return;
+    if (!trimmed && !image) return;
     setWorkspaceClips((current) =>
       current.map((clip) =>
         clip.id === id
@@ -284,7 +257,7 @@ export default function Home() {
               ...clip,
               notes: [
                 ...(clip.notes ?? []),
-                { id: makeId(), text: trimmed, createdAt: new Date().toISOString() },
+                { id: makeId(), text: trimmed, image, createdAt: new Date().toISOString() },
               ],
             }
           : clip,
