@@ -2,6 +2,7 @@ import { workspaceCopy } from "@/lib/clip";
 import { ui } from "@/styles/ui";
 import type { Clip, ClipImage, WorkspaceMode } from "@/types/clip";
 import { ClipCard } from "./ClipCard";
+import { BrandIcon } from "./common";
 
 type TimelineProps = {
   clips: Clip[];
@@ -53,9 +54,7 @@ export function Timeline({
       {clips.length === 0 ? (
         <div className={ui.timeline.empty}>
           <div className="max-w-md">
-            <div className="mx-auto grid size-14 place-items-center rounded-lg bg-[#eef5f1] text-base font-bold text-[#2f7d5b]">
-              CL
-            </div>
+            <BrandIcon className="mx-auto size-16 rounded-2xl" />
             <h3 className="mt-5 text-2xl font-semibold text-[#18211d]">
               {workspaceCopy[workspace].empty}
             </h3>

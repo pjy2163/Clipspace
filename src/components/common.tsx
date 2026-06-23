@@ -1,3 +1,26 @@
+import Image from "next/image";
+
+type BrandIconProps = {
+  className?: string;
+};
+
+export function BrandIcon({ className = "size-10" }: BrandIconProps) {
+  return (
+    <span
+      className={`inline-grid shrink-0 place-items-center overflow-hidden rounded-xl bg-[#f7faff] ${className}`}
+    >
+      <Image
+        alt=""
+        aria-hidden="true"
+        className="size-full"
+        height={256}
+        src="/cliplog-icon.svg"
+        width={256}
+      />
+    </span>
+  );
+}
+
 export function Stat({ label, value }: { label: string; value: number }) {
   return (
     <div className="min-w-20 rounded-md bg-white px-3 py-2 text-center">

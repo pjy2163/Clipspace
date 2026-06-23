@@ -5,7 +5,10 @@ export const metadata: Metadata = {
   title: "Cliplog",
   description: "복사한 텍스트, 링크, 코드, 이미지를 로컬에서 정리하는 클립보드 대시보드입니다.",
   icons: {
-    icon: "/cliplog-icon.svg",
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/cliplog-icon.svg", type: "image/svg+xml" },
+    ],
   },
 };
 

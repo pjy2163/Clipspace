@@ -1,6 +1,6 @@
 import { workspaceCopy } from "@/lib/clip";
 import type { WorkspaceMode } from "@/types/clip";
-import { ModeButton, Stat } from "./common";
+import { BrandIcon, ModeButton, Stat } from "./common";
 
 type WorkspaceHeaderProps = {
   workspace: WorkspaceMode;
@@ -22,9 +22,7 @@ export function WorkspaceHeader({
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-4 px-4 py-3 sm:px-5 xl:flex-row xl:items-center xl:justify-between">
         <div className="space-y-1.5">
           <div className="flex items-center gap-3">
-            <div className="grid size-9 place-items-center rounded-md bg-[#202124] text-xs font-semibold text-white">
-              CL
-            </div>
+            <BrandIcon className="size-12 rounded-2xl" />
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#7a828e]">
                 Cliplog

@@ -1,13 +1,12 @@
 import type { WorkspaceMode } from "@/types/clip";
+import { BrandIcon } from "./common";
 
 export function WorkspaceChooser({ onSelect }: { onSelect: (mode: WorkspaceMode) => void }) {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-[#18211d]/35 px-4 backdrop-blur-sm">
       <section className="w-full max-w-2xl rounded-lg border border-[#d8dfda] bg-white p-5 shadow-2xl">
         <div className="flex items-start gap-3">
-          <div className="grid size-9 shrink-0 place-items-center rounded-md bg-[#18211d] text-xs font-bold text-white">
-            CL
-          </div>
+          <BrandIcon className="size-11 rounded-2xl" />
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#64756d]">
               Start workspace
