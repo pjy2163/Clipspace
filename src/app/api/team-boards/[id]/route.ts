@@ -16,6 +16,10 @@ type TeamClipRow = {
   created_at: string;
 };
 
+type TeamAccessRequest = {
+  accessKey?: string;
+};
+
 function mapClipRow(row: TeamClipRow): Clip {
   return {
     id: row.id,
@@ -32,11 +36,84 @@ function mapClipRow(row: TeamClipRow): Clip {
   };
 }
 
+async function readBodyAccessKey(request: Request) {
+  const body = (await request.json()) as TeamAccessRequest;
+  return body.accessKey?.trim();
+}
+
+async function loadTeamBoard(id: string, accessKey: string) {
+  const supabase = createSupabaseServerClient();
+  const { data: board, error: boardError } = await supabase
+    .from("team_boards")
+    .select("id, name, access_key, created_at")
+    .eq("id", id)
+    .single();
+
+  if (boardError || !board) {
+    return Response.json({ error: "Team board not found." }, { status: 404 });
+  }
+  if (board.access_key !== accessKey) {
+    return Response.json({ error: "Invalid team access key." }, { status: 403 });
+  }
+
+  const { data: clips, error: clipsError } = await supabase
+    .from("team_clips")
+    .select("id, content, title, type, category, favorite, flagged, image, notes, created_at")
+    .eq("board_id", id)
+    .order("created_at", { ascending: false });
+
+  if (clipsError) {
+    return Response.json({ error: clipsError.message }, { status: 500 });
+  }
+
+  return Response.json({
+    id: board.id,
+    name: board.name,
+    accessKey,
+    createdAt: board.created_at,
+    clips: (clips ?? []).map((clip) => mapClipRow(clip as TeamClipRow)),
+  });
+}
+
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
     const { searchParams } = new URL(request.url);
-    const accessKey = searchParams.get("key");
+    const accessKey = searchParams.get("key")?.trim();
+    if (!accessKey) {
+      return Response.json({ error: "Team access key is required." }, { status: 401 });
+    }
+
+    return await loadTeamBoard(id, accessKey);
+  } catch (error) {
+    return Response.json(
+      { error: error instanceof Error ? error.message : "Unable to load team board." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    const accessKey = await readBodyAccessKey(request);
+    if (!accessKey) {
+      return Response.json({ error: "Team access key is required." }, { status: 401 });
+    }
+
+    return await loadTeamBoard(id, accessKey);
+  } catch (error) {
+    return Response.json(
+      { error: error instanceof Error ? error.message : "Unable to load team board." },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    const accessKey = await readBodyAccessKey(request);
     if (!accessKey) {
       return Response.json({ error: "Team access key is required." }, { status: 401 });
     }
@@ -44,7 +121,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const supabase = createSupabaseServerClient();
     const { data: board, error: boardError } = await supabase
       .from("team_boards")
-      .select("id, name, access_key, created_at")
+      .select("id, access_key")
       .eq("id", id)
       .single();
 
@@ -55,26 +132,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       return Response.json({ error: "Invalid team access key." }, { status: 403 });
     }
 
-    const { data: clips, error: clipsError } = await supabase
-      .from("team_clips")
-      .select("id, content, title, type, category, favorite, flagged, image, notes, created_at")
-      .eq("board_id", id)
-      .order("created_at", { ascending: false });
-
-    if (clipsError) {
-      return Response.json({ error: clipsError.message }, { status: 500 });
+    const { error: deleteError } = await supabase.from("team_boards").delete().eq("id", id);
+    if (deleteError) {
+      return Response.json({ error: deleteError.message }, { status: 500 });
     }
 
-    return Response.json({
-      id: board.id,
-      name: board.name,
-      accessKey,
-      createdAt: board.created_at,
-      clips: (clips ?? []).map((clip) => mapClipRow(clip as TeamClipRow)),
-    });
+    return Response.json({ ok: true });
   } catch (error) {
     return Response.json(
-      { error: error instanceof Error ? error.message : "Unable to load team board." },
+      { error: error instanceof Error ? error.message : "Unable to delete team board." },
       { status: 500 },
     );
   }

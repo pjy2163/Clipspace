@@ -35,6 +35,7 @@ import {
 } from "@/lib/storage";
 import {
   createRemoteTeamBoard,
+  deleteRemoteTeamBoard,
   loadRemoteTeamBoard,
   type RemoteTeamBoard,
   saveRemoteTeamClips,
@@ -72,6 +73,26 @@ function sortClipsByCreatedAt(clips: Clip[]) {
 
 function getClipIds(clips: Clip[]) {
   return new Set(clips.map((clip) => clip.id));
+}
+
+function isSupabaseTeamId(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+}
+
+function getTeamAccessKeyFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  return (hashParams.get("key") ?? params.get("key"))?.trim();
+}
+
+function writeTeamUrl(teamId: string, accessKey?: string) {
+  const url = new URL(window.location.href);
+  url.searchParams.set("team", teamId);
+  url.searchParams.delete("key");
+  url.hash = accessKey ? `key=${encodeURIComponent(accessKey)}` : "";
+  window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
 }
 
 function getDeletedKnownClipIds(clips: Clip[], knownRemoteClipIds?: Set<string>) {
@@ -179,12 +200,16 @@ export default function Home() {
         if (cancelled) return;
         const params = new URLSearchParams(window.location.search);
         const incomingTeamId = params.get("team")?.trim();
-        const incomingTeamKey = params.get("key")?.trim();
-        let selectedWorkspace = incomingTeamId
+        const incomingTeamKey = getTeamAccessKeyFromUrl();
+        const hasValidIncomingTeamId = Boolean(incomingTeamId && isSupabaseTeamId(incomingTeamId));
+        let selectedWorkspace = hasValidIncomingTeamId && incomingTeamId
           ? createTeamWorkspaceKey(incomingTeamId)
           : loadWorkspaceMode();
         let nextStoredClips = storedClips;
-        if (incomingTeamId && incomingTeamKey) {
+        if (incomingTeamId && !hasValidIncomingTeamId) {
+          selectedWorkspace = loadWorkspaceMode();
+          setStatus("팀 링크 형식이 올바르지 않아요. 팀에서 링크를 다시 복사해 주세요.");
+        } else if (incomingTeamId && incomingTeamKey) {
           try {
             const remoteBoard = await loadRemoteTeamBoard(incomingTeamId, incomingTeamKey);
             syncedTeamClipIdsRef.current[incomingTeamId] = getClipIds(remoteBoard.clips);
@@ -347,12 +372,8 @@ export default function Home() {
     }
     const teamId = getTeamIdFromWorkspace(mode);
     if (teamId) {
-      const url = new URL(window.location.href);
       const accessKey = accessKeyOverride ?? clipsByWorkspace.teams[teamId]?.accessKey;
-      url.searchParams.set("team", teamId);
-      if (accessKey) url.searchParams.set("key", accessKey);
-      else url.searchParams.delete("key");
-      window.history.replaceState(null, "", `${url.pathname}${url.search}`);
+      writeTeamUrl(teamId, accessKey);
     }
   };
 
@@ -426,14 +447,51 @@ export default function Home() {
     }
   };
 
+  const deleteTeamBoard = async () => {
+    const teamId = getTeamIdFromWorkspace(workspace);
+    if (!teamId || !currentTeam?.accessKey) {
+      setStatus("삭제할 팀 보드를 찾지 못했어요.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `${currentTeam.name} 팀 보드를 삭제할까요? 공유된 클립도 Supabase에서 삭제됩니다.`,
+    );
+    if (!confirmed) return;
+
+    try {
+      await deleteRemoteTeamBoard(teamId, currentTeam.accessKey);
+      delete syncedTeamClipIdsRef.current[teamId];
+      setPendingTeamBoard((current) => (current?.id === teamId ? null : current));
+      setSharedTeamLink("");
+      setClipsByWorkspace((current) => {
+        return {
+          ...current,
+          teams: Object.fromEntries(
+            Object.entries(current.teams).filter(([id]) => id !== teamId),
+          ),
+        };
+      });
+      setWorkspace("personal");
+      window.history.replaceState(null, "", window.location.pathname);
+      setStatus(`${currentTeam.name} 팀 보드를 삭제했어요.`);
+    } catch (error) {
+      setStatus(
+        error instanceof Error
+          ? `팀 보드를 삭제하지 못했어요: ${error.message}`
+          : "팀 보드를 삭제하지 못했어요. 잠시 뒤 다시 시도해 주세요.",
+      );
+    }
+  };
+
   const copyTeamLink = async () => {
     const teamId = getTeamIdFromWorkspace(workspace);
     if (!teamId) return;
     const accessKey = currentTeam?.accessKey;
     const url = new URL(window.location.href);
     url.searchParams.set("team", teamId);
-    if (accessKey) url.searchParams.set("key", accessKey);
-    else url.searchParams.delete("key");
+    url.searchParams.delete("key");
+    url.hash = accessKey ? `key=${encodeURIComponent(accessKey)}` : "";
 
     const link = url.toString();
     setSharedTeamLink(link);
@@ -693,6 +751,7 @@ export default function Home() {
         currentTeam={currentTeam}
         onCopyTeamLink={() => void copyTeamLink()}
         onCreateTeamBoard={createTeamBoard}
+        onDeleteTeamBoard={() => void deleteTeamBoard()}
         onSelectWorkspace={selectWorkspace}
         stats={stats}
         teamBoards={teamBoards}

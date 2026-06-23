@@ -14,6 +14,7 @@ type WorkspaceHeaderProps = {
   };
   onCopyTeamLink: () => void;
   onCreateTeamBoard: (name: string) => void;
+  onDeleteTeamBoard: () => void;
   onSelectWorkspace: (mode: WorkspaceKey) => void;
 };
 
@@ -21,6 +22,7 @@ export function WorkspaceHeader({
   currentTeam,
   onCopyTeamLink,
   onCreateTeamBoard,
+  onDeleteTeamBoard,
   workspace,
   stats,
   teamBoards,
@@ -38,6 +40,11 @@ export function WorkspaceHeader({
     { href: "/privacy", label: "개인정보" },
     { href: "/use-cases", label: "활용 사례" },
   ];
+  const requestTeamName = () => {
+    const name = window.prompt("팀 이름을 입력하세요.");
+    if (name === null) return;
+    onCreateTeamBoard(name);
+  };
 
   return (
     <section className="border-b border-[#e2e5ea] bg-white">
@@ -102,19 +109,28 @@ export function WorkspaceHeader({
             ) : null}
             <button
               className="whitespace-nowrap rounded-full px-3 py-2 text-sm font-semibold text-[#5f6673] transition hover:bg-white hover:text-[#202124]"
-              onClick={() => onCreateTeamBoard("")}
+              onClick={requestTeamName}
               type="button"
             >
               팀 생성
             </button>
             {mode === "team" ? (
-              <button
-                className="rounded-md bg-[#315fbd] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#274d9b]"
-                onClick={onCopyTeamLink}
-                type="button"
-              >
-                링크 복사
-              </button>
+              <>
+                <button
+                  className="rounded-md bg-[#315fbd] px-3 py-2 text-sm font-semibold text-white transition hover:bg-[#274d9b]"
+                  onClick={onCopyTeamLink}
+                  type="button"
+                >
+                  링크 복사
+                </button>
+                <button
+                  className="rounded-md border border-[#ead6d6] bg-white px-3 py-2 text-sm font-semibold text-[#9a3d3d] transition hover:bg-[#fff6f6]"
+                  onClick={onDeleteTeamBoard}
+                  type="button"
+                >
+                  팀 삭제
+                </button>
+              </>
             ) : null}
           </div>
         </div>

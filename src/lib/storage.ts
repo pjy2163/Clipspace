@@ -109,8 +109,16 @@ function normalizeTeamName(id: string, name?: string) {
   return name?.trim() || `Team ${id.slice(0, 4).toUpperCase()}`;
 }
 
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+    value,
+  );
+}
+
 function isWorkspaceKey(value: string | null): value is WorkspaceKey {
-  return value === "personal" || Boolean(value?.startsWith("team:"));
+  if (value === "personal") return true;
+  if (!value?.startsWith("team:")) return false;
+  return isUuid(value.slice("team:".length));
 }
 
 function normalizeState(state: StoredState) {
@@ -118,7 +126,7 @@ function normalizeState(state: StoredState) {
     personal: (state.personal ?? []).map(refreshClipClassification),
     teams: Object.fromEntries(
       Object.entries(state.teams ?? {})
-        .filter(([, team]) => Boolean(team.accessKey))
+        .filter(([id, team]) => Boolean(team.accessKey) && isUuid(id))
         .map(([id, team]) => [
           id,
           {
@@ -137,7 +145,6 @@ export function loadWorkspaceMode(): WorkspaceKey {
   if (typeof window === "undefined") return "personal";
   const stored =
     window.localStorage.getItem(WORKSPACE_KEY) ?? window.localStorage.getItem(LEGACY_WORKSPACE_KEY);
-  if (stored === "team") return "team:default";
   return isWorkspaceKey(stored) ? stored : "personal";
 }
 
@@ -145,7 +152,7 @@ export function hasStoredWorkspace() {
   if (typeof window === "undefined") return true;
   const stored =
     window.localStorage.getItem(WORKSPACE_KEY) ?? window.localStorage.getItem(LEGACY_WORKSPACE_KEY);
-  return stored === "personal" || stored === "team" || Boolean(stored?.startsWith("team:"));
+  return isWorkspaceKey(stored);
 }
 
 export async function loadStoredClips(): Promise<StoredState> {

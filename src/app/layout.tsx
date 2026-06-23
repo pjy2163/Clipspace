@@ -53,6 +53,11 @@ export default function RootLayout({
     <html lang="ko" className="h-full antialiased">
       <head>
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-Y14L3YESDV" />
+        <Script
+          async
+          crossOrigin="anonymous"
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7211753432405785"
+        />
         <Script id="google-analytics">
           {`
             window.dataLayer = window.dataLayer || [];

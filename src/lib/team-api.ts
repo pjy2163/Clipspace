@@ -29,10 +29,25 @@ export async function createRemoteTeamBoard(name: string) {
 }
 
 export async function loadRemoteTeamBoard(id: string, accessKey: string) {
-  const response = await fetch(
-    `/api/team-boards/${encodeURIComponent(id)}?key=${encodeURIComponent(accessKey)}`,
-  );
+  const response = await fetch(`/api/team-boards/${encodeURIComponent(id)}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ accessKey }),
+  });
   return parseApiResponse<RemoteTeamBoard>(response);
+}
+
+export async function deleteRemoteTeamBoard(id: string, accessKey: string) {
+  const response = await fetch(`/api/team-boards/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ accessKey }),
+  });
+  return parseApiResponse<{ ok: true }>(response);
 }
 
 export async function saveRemoteTeamClips(
