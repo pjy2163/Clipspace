@@ -26,6 +26,8 @@ const pageCopy = {
     homeHref: "/",
     brandLabel: "ClipSpace 클립스페이스",
     brandLine: "공유 클립보드 메모장",
+    languageHref: "/en",
+    languageLabel: "English",
     aside:
       "복사 붙여넣기한 내용을 카드로 저장하고, 메모를 붙이고, 필요할 때 검색하세요. 혼자 쓰는 자료는 개인 클립보드에 두고 팀 자료만 공유 클립보드로 열 수 있습니다.",
   },
@@ -33,6 +35,8 @@ const pageCopy = {
     homeHref: "/en",
     brandLabel: "ClipSpace",
     brandLine: "Shared clipboard notes",
+    languageHref: "/",
+    languageLabel: "한국어",
     aside:
       "Save copied links, code, notes, and images as searchable cards. Keep personal material in your browser and open team material in shared clipboard boards.",
   },
@@ -72,6 +76,12 @@ export function InfoPage({ eyebrow, title, description, children, locale = "ko" 
                 {item.label}
               </Link>
             ))}
+            <Link
+              className="rounded-md border border-[#d7dce5] px-2.5 py-1.5 text-[#354052] transition hover:border-[#9aa7bd] hover:bg-[#f7f9fc]"
+              href={copy.languageHref}
+            >
+              {copy.languageLabel}
+            </Link>
           </nav>
         </div>
       </header>

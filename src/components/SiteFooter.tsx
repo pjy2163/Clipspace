@@ -7,12 +7,14 @@ const footerLinks = {
     { href: "/guide", label: "사용법" },
     { href: "/privacy", label: "개인정보" },
     { href: "/use-cases", label: "활용 사례" },
+    { href: "/en", label: "English" },
   ],
   en: [
     { href: "/en/about", label: "About" },
     { href: "/en/guide", label: "Guide" },
     { href: "/en/privacy", label: "Privacy" },
     { href: "/en/use-cases", label: "Use cases" },
+    { href: "/", label: "한국어" },
   ],
 };
 
