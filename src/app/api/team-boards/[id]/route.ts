@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createTeamShareToken } from "@/lib/team-share-token";
 import type { Clip } from "@/types/clip";
 
 export const runtime = "nodejs";
@@ -70,6 +71,7 @@ async function loadTeamBoard(id: string, accessKey: string) {
     id: board.id,
     name: board.name,
     accessKey,
+    shareToken: createTeamShareToken({ id: board.id, accessKey }),
     createdAt: board.created_at,
     clips: (clips ?? []).map((clip) => mapClipRow(clip as TeamClipRow)),
   });

@@ -113,7 +113,7 @@ export function WorkspaceChooser({
                       {team.name}
                     </span>
                     <span className="mt-1 block truncate text-xs text-[#64756d]">
-                      team={team.id}
+                      공유 링크 사용
                     </span>
                   </span>
                   <span className="shrink-0 text-xs font-semibold text-[#315fbd]">열기</span>

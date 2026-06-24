@@ -2,6 +2,7 @@ import type { Clip, TeamBoard } from "@/types/clip";
 
 export type RemoteTeamBoard = TeamBoard & {
   accessKey: string;
+  shareToken?: string;
   clips: Clip[];
 };
 
@@ -35,6 +36,13 @@ export async function loadRemoteTeamBoard(id: string, accessKey: string) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ accessKey }),
+  });
+  return parseApiResponse<RemoteTeamBoard>(response);
+}
+
+export async function loadRemoteSharedTeamBoard(shareToken: string) {
+  const response = await fetch(`/api/team-shares/${encodeURIComponent(shareToken)}`, {
+    method: "POST",
   });
   return parseApiResponse<RemoteTeamBoard>(response);
 }

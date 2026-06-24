@@ -1,4 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { createTeamShareToken } from "@/lib/team-share-token";
 
 export const runtime = "nodejs";
 
@@ -30,6 +31,7 @@ export async function POST(request: Request) {
       id: data.id,
       name: data.name,
       accessKey,
+      shareToken: createTeamShareToken({ id: data.id, accessKey }),
       createdAt: data.created_at,
       clips: [],
     });

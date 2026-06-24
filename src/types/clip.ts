@@ -47,4 +47,5 @@ export type TeamBoard = {
   name: string;
   createdAt: string;
   accessKey?: string;
+  shareToken?: string;
 };

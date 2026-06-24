@@ -134,6 +134,7 @@ function normalizeState(state: StoredState) {
             name: normalizeTeamName(id, team.name),
             createdAt: team.createdAt ?? new Date().toISOString(),
             accessKey: team.accessKey,
+            shareToken: team.shareToken,
             clips: (team.clips ?? []).map(refreshClipClassification),
           },
         ]),

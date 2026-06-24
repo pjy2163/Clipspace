@@ -36,6 +36,7 @@ import {
 import {
   createRemoteTeamBoard,
   deleteRemoteTeamBoard,
+  loadRemoteSharedTeamBoard,
   loadRemoteTeamBoard,
   type RemoteTeamBoard,
   saveRemoteTeamClips,
@@ -87,11 +88,11 @@ function getTeamAccessKeyFromUrl() {
   return (hashParams.get("key") ?? params.get("key"))?.trim();
 }
 
-function writeTeamUrl(teamId: string, accessKey?: string) {
+function writeTeamUrl(teamId: string, shareToken?: string, accessKey?: string) {
   const url = new URL(window.location.href);
-  url.searchParams.set("team", teamId);
+  url.searchParams.set("team", shareToken || teamId);
   url.searchParams.delete("key");
-  url.hash = accessKey ? `key=${encodeURIComponent(accessKey)}` : "";
+  url.hash = !shareToken && accessKey ? `key=${encodeURIComponent(accessKey)}` : "";
   window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
 }
 
@@ -128,6 +129,7 @@ function mergeTeamBoard(
     ...remoteTeam,
     ...localTeam,
     accessKey: localTeam.accessKey ?? remoteTeam.accessKey,
+    shareToken: localTeam.shareToken ?? remoteTeam.shareToken,
     clips: mergeClips(localTeam.clips, remoteTeam.clips, knownRemoteClipIds),
   };
 }
@@ -199,38 +201,57 @@ export default function Home() {
         const storedClips = await loadStoredClips();
         if (cancelled) return;
         const params = new URLSearchParams(window.location.search);
-        const incomingTeamId = params.get("team")?.trim();
+        const incomingTeamParam = params.get("team")?.trim();
         const incomingTeamKey = getTeamAccessKeyFromUrl();
-        const hasValidIncomingTeamId = Boolean(incomingTeamId && isSupabaseTeamId(incomingTeamId));
-        let selectedWorkspace = hasValidIncomingTeamId && incomingTeamId
-          ? createTeamWorkspaceKey(incomingTeamId)
+        const hasValidIncomingTeamId = Boolean(
+          incomingTeamParam && isSupabaseTeamId(incomingTeamParam),
+        );
+        const hasIncomingShareToken = Boolean(incomingTeamParam && !hasValidIncomingTeamId);
+        let selectedWorkspace = hasValidIncomingTeamId && incomingTeamParam
+          ? createTeamWorkspaceKey(incomingTeamParam)
           : loadWorkspaceMode();
         let nextStoredClips = storedClips;
-        if (incomingTeamId && !hasValidIncomingTeamId) {
-          selectedWorkspace = loadWorkspaceMode();
-          setStatus("팀 링크 형식이 올바르지 않아요. 팀에서 링크를 다시 복사해 주세요.");
-        } else if (incomingTeamId && incomingTeamKey) {
+        if (hasIncomingShareToken && incomingTeamParam) {
           try {
-            const remoteBoard = await loadRemoteTeamBoard(incomingTeamId, incomingTeamKey);
-            syncedTeamClipIdsRef.current[incomingTeamId] = getClipIds(remoteBoard.clips);
+            const remoteBoard = await loadRemoteSharedTeamBoard(incomingTeamParam);
+            syncedTeamClipIdsRef.current[remoteBoard.id] = getClipIds(remoteBoard.clips);
+            selectedWorkspace = createTeamWorkspaceKey(remoteBoard.id);
             nextStoredClips = {
               ...storedClips,
               teams: {
                 ...storedClips.teams,
-                [incomingTeamId]: remoteBoard,
+                [remoteBoard.id]: remoteBoard,
               },
             };
+            writeTeamUrl(remoteBoard.id, remoteBoard.shareToken, remoteBoard.accessKey);
             setStatus(`${remoteBoard.name} 팀 보드를 불러왔어요.`);
           } catch {
             selectedWorkspace = loadWorkspaceMode();
             setStatus("팀 링크를 불러오지 못했어요. 링크가 맞는지 확인해 주세요.");
           }
-        } else if (incomingTeamId && !incomingTeamKey) {
+        } else if (incomingTeamParam && incomingTeamKey) {
+          try {
+            const remoteBoard = await loadRemoteTeamBoard(incomingTeamParam, incomingTeamKey);
+            syncedTeamClipIdsRef.current[incomingTeamParam] = getClipIds(remoteBoard.clips);
+            nextStoredClips = {
+              ...storedClips,
+              teams: {
+                ...storedClips.teams,
+                [incomingTeamParam]: remoteBoard,
+              },
+            };
+            writeTeamUrl(remoteBoard.id, remoteBoard.shareToken, remoteBoard.accessKey);
+            setStatus(`${remoteBoard.name} 팀 보드를 불러왔어요.`);
+          } catch {
+            selectedWorkspace = loadWorkspaceMode();
+            setStatus("팀 링크를 불러오지 못했어요. 링크가 맞는지 확인해 주세요.");
+          }
+        } else if (incomingTeamParam && !incomingTeamKey) {
           selectedWorkspace = loadWorkspaceMode();
           setStatus("팀 링크에 접근키가 없어요. 팀에서 링크를 다시 복사해 주세요.");
         }
         setWorkspace(selectedWorkspace);
-        setHasSelectedWorkspace(Boolean(incomingTeamId) || hasStoredWorkspace());
+        setHasSelectedWorkspace(Boolean(incomingTeamParam) || hasStoredWorkspace());
         setClipsByWorkspace(nextStoredClips);
         const storedSidebarWidth = Number(
           window.localStorage.getItem(LAYOUT_KEY) ?? window.localStorage.getItem(LEGACY_LAYOUT_KEY),
@@ -285,6 +306,7 @@ export default function Home() {
             localTeam.name === remoteBoard.name &&
             localTeam.createdAt === remoteBoard.createdAt &&
             localTeam.accessKey === remoteBoard.accessKey &&
+            localTeam.shareToken === remoteBoard.shareToken &&
             haveSameClips(localTeam.clips, nextClips)
           ) {
             return current;
@@ -298,6 +320,7 @@ export default function Home() {
                 name: remoteBoard.name,
                 createdAt: remoteBoard.createdAt,
                 accessKey: remoteBoard.accessKey,
+                shareToken: remoteBoard.shareToken,
                 clips: nextClips,
               },
             },
@@ -359,7 +382,10 @@ export default function Home() {
     window.localStorage.setItem(LAYOUT_KEY, String(sidebarWidth));
   }, [isReady, sidebarWidth]);
 
-  const selectWorkspace = (mode: WorkspaceKey, accessKeyOverride?: string) => {
+  const selectWorkspace = (
+    mode: WorkspaceKey,
+    credentials?: { accessKey?: string; shareToken?: string },
+  ) => {
     setWorkspace(mode);
     setHasSelectedWorkspace(true);
     setSharedTeamLink("");
@@ -372,8 +398,10 @@ export default function Home() {
     }
     const teamId = getTeamIdFromWorkspace(mode);
     if (teamId) {
-      const accessKey = accessKeyOverride ?? clipsByWorkspace.teams[teamId]?.accessKey;
-      writeTeamUrl(teamId, accessKey);
+      const team = clipsByWorkspace.teams[teamId];
+      const accessKey = credentials?.accessKey ?? team?.accessKey;
+      const shareToken = credentials?.shareToken ?? team?.shareToken;
+      writeTeamUrl(teamId, shareToken, accessKey);
     }
   };
 
@@ -435,7 +463,10 @@ export default function Home() {
           [remoteBoard.id]: remoteBoard,
         },
       }));
-      selectWorkspace(createTeamWorkspaceKey(remoteBoard.id), remoteBoard.accessKey);
+      selectWorkspace(createTeamWorkspaceKey(remoteBoard.id), {
+        accessKey: remoteBoard.accessKey,
+        shareToken: remoteBoard.shareToken,
+      });
       setStatus(`${remoteBoard.name} 팀 보드를 만들었어요. 링크를 복사해 공유할 수 있습니다.`);
       return;
     } catch (error) {
@@ -488,17 +519,18 @@ export default function Home() {
     const teamId = getTeamIdFromWorkspace(workspace);
     if (!teamId) return;
     const accessKey = currentTeam?.accessKey;
+    const shareToken = currentTeam?.shareToken;
     const url = new URL(window.location.href);
-    url.searchParams.set("team", teamId);
+    url.searchParams.set("team", shareToken || teamId);
     url.searchParams.delete("key");
-    url.hash = accessKey ? `key=${encodeURIComponent(accessKey)}` : "";
+    url.hash = !shareToken && accessKey ? `key=${encodeURIComponent(accessKey)}` : "";
 
     const link = url.toString();
     setSharedTeamLink(link);
     const copied = await copyText(link);
     setStatus(
       copied
-        ? accessKey
+        ? shareToken || accessKey
           ? "팀 링크를 복사했어요. 같은 주소로 팀 보드를 열 수 있습니다."
           : "로컬 팀 링크를 복사했어요. Supabase 연결 전에는 다른 기기와 동기화되지 않습니다."
         : "브라우저가 자동 복사를 막았어요. 아래 링크를 직접 복사해 주세요.",
