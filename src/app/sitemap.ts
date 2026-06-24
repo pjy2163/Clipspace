@@ -1,6 +1,10 @@
 import type { MetadataRoute } from "next";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://clipspace.co.kr";
+const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+const siteUrl =
+  configuredSiteUrl && !configuredSiteUrl.includes("localhost")
+    ? configuredSiteUrl.replace(/\/$/, "")
+    : "https://clipspace.co.kr";
 
 const routes = [
   { path: "", priority: 1 },
