@@ -2,20 +2,24 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import "./globals.css";
 
+const configuredSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.NODE_ENV === "production" ? "https://clipspace.co.kr" : "http://localhost:3000");
+  configuredSiteUrl && !configuredSiteUrl.includes("localhost")
+    ? configuredSiteUrl.replace(/\/$/, "")
+    : process.env.NODE_ENV === "production"
+      ? "https://clipspace.co.kr"
+      : "http://localhost:3000";
 const siteName = "ClipSpace";
-const title = "ClipSpace - 공유 클립보드, 복사 붙여넣기 메모장";
+const title = "ClipSpace 클립스페이스 - 공유 클립보드, 복사 붙여넣기 메모장";
 const description =
-  "복사한 링크, 코드, 메모, 이미지를 개인 클립보드와 팀 공유 클립보드에 저장하고 다시 찾는 온라인 메모장입니다.";
+  "클립스페이스는 복사한 링크, 코드, 메모, 이미지를 개인 클립보드와 팀 공유 클립보드에 저장하고 다시 찾는 온라인 메모장입니다.";
 const previewImage = "/clipspace-preview.png";
 const absolutePreviewImage = `${siteUrl}${previewImage}`;
 const webApplicationJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   name: siteName,
-  alternateName: ["공유 클립보드", "복사 붙여넣기 메모장", "온라인 메모장"],
+  alternateName: ["클립스페이스", "공유 클립보드", "복사 붙여넣기 메모장", "온라인 메모장"],
   url: siteUrl,
   image: absolutePreviewImage,
   description,
@@ -38,6 +42,8 @@ export const metadata: Metadata = {
   },
   description,
   keywords: [
+    "ClipSpace",
+    "클립스페이스",
     "클립보드",
     "공유 클립보드",
     "복사 붙여넣기",

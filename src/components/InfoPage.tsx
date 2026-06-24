@@ -4,37 +4,66 @@ import type { ReactNode } from "react";
 import { BrandIcon } from "./common";
 import { SiteFooter } from "./SiteFooter";
 
-const navItems = [
-  { href: "/", label: "앱" },
-  { href: "/about", label: "소개" },
-  { href: "/guide", label: "사용법" },
-  { href: "/privacy", label: "개인정보" },
-  { href: "/use-cases", label: "활용 사례" },
-];
+const navItems = {
+  ko: [
+    { href: "/", label: "앱" },
+    { href: "/about", label: "소개" },
+    { href: "/guide", label: "사용법" },
+    { href: "/privacy", label: "개인정보" },
+    { href: "/use-cases", label: "활용 사례" },
+  ],
+  en: [
+    { href: "/", label: "App" },
+    { href: "/en/about", label: "About" },
+    { href: "/en/guide", label: "Guide" },
+    { href: "/en/privacy", label: "Privacy" },
+    { href: "/en/use-cases", label: "Use cases" },
+  ],
+};
+
+const pageCopy = {
+  ko: {
+    homeHref: "/",
+    brandLabel: "ClipSpace 클립스페이스",
+    brandLine: "공유 클립보드 메모장",
+    aside:
+      "복사 붙여넣기한 내용을 카드로 저장하고, 메모를 붙이고, 필요할 때 검색하세요. 혼자 쓰는 자료는 개인 클립보드에 두고 팀 자료만 공유 클립보드로 열 수 있습니다.",
+  },
+  en: {
+    homeHref: "/en",
+    brandLabel: "ClipSpace",
+    brandLine: "Shared clipboard notes",
+    aside:
+      "Save copied links, code, notes, and images as searchable cards. Keep personal material in your browser and open team material in shared clipboard boards.",
+  },
+};
 
 type InfoPageProps = {
   eyebrow: string;
   title: string;
   description: string;
   children: ReactNode;
+  locale?: "ko" | "en";
 };
 
-export function InfoPage({ eyebrow, title, description, children }: InfoPageProps) {
+export function InfoPage({ eyebrow, title, description, children, locale = "ko" }: InfoPageProps) {
+  const copy = pageCopy[locale];
+
   return (
     <main className="min-h-screen bg-[#f6f7f9] text-[#202124]" id="top">
       <header className="border-b border-[#e2e5ea] bg-white">
         <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <Link className="flex items-center gap-3" href="/">
+          <Link className="flex items-center gap-3" href={copy.homeHref}>
             <BrandIcon className="size-10 rounded-xl" />
             <span>
               <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-[#7a828e]">
-                ClipSpace
+                {copy.brandLabel}
               </span>
-              <span className="text-lg font-semibold">공유 클립보드 메모장</span>
+              <span className="text-lg font-semibold">{copy.brandLine}</span>
             </span>
           </Link>
           <nav className="flex flex-wrap gap-2 text-sm font-semibold text-[#5f6673]">
-            {navItems.map((item) => (
+            {navItems[locale].map((item) => (
               <Link
                 className="rounded-md px-2.5 py-1.5 transition hover:bg-[#f0f3f8] hover:text-[#202124]"
                 href={item.href}
@@ -74,12 +103,11 @@ export function InfoPage({ eyebrow, title, description, children }: InfoPageProp
             />
           </div>
           <div className="rounded-lg border border-[#e2e5ea] bg-white p-4 text-sm leading-6 text-[#5f6673]">
-            복사 붙여넣기한 내용을 카드로 저장하고, 메모를 붙이고, 필요할 때 검색하세요.
-            혼자 쓰는 자료는 개인 클립보드에 두고 팀 자료만 공유 클립보드로 열 수 있습니다.
+            {copy.aside}
           </div>
         </aside>
       </section>
-      <SiteFooter />
+      <SiteFooter locale={locale} />
     </main>
   );
 }
