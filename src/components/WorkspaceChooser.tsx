@@ -40,11 +40,11 @@ export function WorkspaceChooser({
               Start workspace
             </p>
             <h2 className="mt-1 text-2xl font-semibold text-[#18211d]">
-              공유 클립보드와 개인 메모장 중 선택하세요
+              온라인 클립보드와 팀 공유 클립보드 중 선택하세요
             </h2>
             <p className="mt-2 text-sm leading-6 text-[#64756d]">
               복사 붙여넣기한 링크, 코드, 메모, 이미지를 개인 자료와 팀 자료로
-              나누어 저장합니다. 언제든 상단에서 전환할 수 있어요.
+              나누어 저장합니다. 개인 온라인 클립보드와 팀 공유 클립보드를 언제든 전환할 수 있어요.
             </p>
           </div>
         </div>
@@ -54,18 +54,18 @@ export function WorkspaceChooser({
             className="rounded-lg border border-[#b9c8bf] bg-[#f8faf9] p-4 text-left transition hover:border-[#2f7d5b] hover:bg-[#eef5f1]"
             onClick={() => onSelect("personal")}
           >
-            <span className="text-sm font-semibold text-[#18211d]">개인으로 시작</span>
+            <span className="text-sm font-semibold text-[#18211d]">개인으로 시작하기</span>
             <span className="mt-2 block text-sm leading-6 text-[#64756d]">
-              내 메모, 코드 조각, 링크를 혼자 정리하는 복사 붙여넣기 메모장입니다.
+              개인 온라인 클립보드로 내 메모, 코드 조각, 링크를 혼자 정리합니다.
             </span>
           </button>
           <button
             className="rounded-lg border border-[#b9c8bf] bg-[#f8faf9] p-4 text-left transition hover:border-[#2f7d5b] hover:bg-[#eef5f1]"
             onClick={() => onCreateTeamBoard(teamName)}
           >
-            <span className="text-sm font-semibold text-[#18211d]">새 팀 보드 만들기</span>
+            <span className="text-sm font-semibold text-[#18211d]">새 팀 공유 클립보드 만들기</span>
             <span className="mt-2 block text-sm leading-6 text-[#64756d]">
-              팀 링크로 같이 쓰는 공유 클립보드를 만듭니다.
+              팀 링크로 같이 쓰는 팀 공유 클립보드를 만듭니다.
             </span>
           </button>
         </div>

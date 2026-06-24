@@ -34,9 +34,9 @@ const faqJsonLd = {
 };
 
 export const metadata: Metadata = {
-  title: "ClipSpace 사용법 - 복사 붙여넣기 클립보드 저장",
+  title: "ClipSpace 사용법 - 온라인 클립보드 저장과 검색",
   description:
-    "복사한 내용을 ClipSpace에 저장하고 메모, 검색, 팀 공유 클립보드로 다시 쓰는 방법입니다.",
+    "복사한 내용을 ClipSpace 온라인 클립보드에 저장하고 메모, 검색, 팀 공유 클립보드로 다시 쓰는 방법입니다.",
 };
 
 export default function GuidePage() {
@@ -44,11 +44,11 @@ export default function GuidePage() {
     <InfoPage
       description="복사하고, 붙여넣고, 필요할 때 검색하세요. ClipSpace는 직접 저장한 클립만 보관하는 온라인 클립보드 메모장입니다."
       eyebrow="Guide"
-      title="복사 붙여넣기한 내용을 카드로 쌓는 방법"
+      title="복사 붙여넣기한 내용을 온라인 클립보드 카드로 쌓는 방법"
     >
       <InfoSection title="1. 복사한 뒤 가져오기">
         <p>
-          링크나 코드를 복사한 뒤 ClipSpace에서 가져오기 버튼을 누르면 클립보드
+          링크나 코드를 복사한 뒤 ClipSpace에서 가져오기 버튼을 누르면 온라인 클립보드
           내용이 카드로 저장됩니다. 브라우저 권한이 막히면 직접 추가 칸에
           붙여넣고 Enter를 누르면 됩니다.
         </p>

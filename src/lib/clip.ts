@@ -11,17 +11,17 @@ import type {
 export const workspaceCopy: Record<WorkspaceMode, WorkspaceCopy> = {
   personal: {
     label: "개인",
-    title: "개인 클립보드",
-    description: "내가 복사한 메모, 코드, 링크를 혼자 쓰는 작업 로그로 정리합니다.",
+    title: "개인 온라인 클립보드",
+    description: "내가 복사한 메모, 코드, 링크를 혼자 쓰는 온라인 클립보드로 정리합니다.",
     empty: "개인 클립보드가 비어 있어요",
     status: "개인 보드에 저장했어요.",
   },
   team: {
     label: "팀",
-    title: "팀 자료 보드",
-    description: "팀 프로젝트에서 같이 볼 자료, 레퍼런스, 코드 조각을 모으는 공간입니다.",
-    empty: "팀 자료 보드가 비어 있어요",
-    status: "팀 자료 보드에 저장했어요.",
+    title: "팀 공유 클립보드",
+    description: "팀 프로젝트에서 같이 볼 자료, 레퍼런스, 코드 조각을 모으는 팀 공유 클립보드입니다.",
+    empty: "팀 공유 클립보드가 비어 있어요",
+    status: "팀 공유 클립보드에 저장했어요.",
   },
 };
 

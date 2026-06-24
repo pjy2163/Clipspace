@@ -22,7 +22,8 @@ const footerCopy = {
   ko: {
     ariaLabel: "ClipSpace 하단 안내 페이지",
     brandLine: "복사한 자료를 다시 찾기 쉽게",
-    description: "개인 클립은 브라우저에 저장하고, 팀 자료는 링크 보드로 필요한 사람과 공유합니다.",
+    description:
+      "개인 클립은 온라인 클립보드처럼 브라우저에 저장하고, 팀 자료는 링크 보드로 필요한 사람과 공유합니다.",
     topLabel: "페이지 상단으로 이동",
     topTitle: "상단으로",
   },

@@ -25,11 +25,11 @@ const pageCopy = {
   ko: {
     homeHref: "/",
     brandLabel: "ClipSpace 클립스페이스",
-    brandLine: "공유 클립보드 메모장",
+    brandLine: "온라인 클립보드 메모장",
     languageHref: "/en",
     languageLabel: "English",
     aside:
-      "복사 붙여넣기한 내용을 카드로 저장하고, 메모를 붙이고, 필요할 때 검색하세요. 혼자 쓰는 자료는 개인 클립보드에 두고 팀 자료만 공유 클립보드로 열 수 있습니다.",
+      "복사 붙여넣기한 내용을 온라인 클립보드 카드로 저장하고, 메모를 붙이고, 필요할 때 검색하세요. 혼자 쓰는 자료는 개인 클립보드에 두고 팀 자료만 공유 클립보드로 열 수 있습니다.",
   },
   en: {
     homeHref: "/en",

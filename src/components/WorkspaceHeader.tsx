@@ -32,8 +32,8 @@ export function WorkspaceHeader({
   const title = workspace === "personal" ? workspaceCopy.personal.title : currentTeam?.name ?? "Team board";
   const description =
     workspace === "personal"
-      ? "내가 복사한 메모, 코드, 링크를 혼자 쓰는 작업 로그로 정리합니다."
-      : "팀 링크로 모은 자료, 레퍼런스, 코드 조각을 함께 보는 공간으로 정리합니다.";
+      ? "내가 복사한 메모, 코드, 링크를 혼자 쓰는 온라인 클립보드로 정리합니다."
+      : "팀 링크로 모은 자료, 레퍼런스, 코드 조각을 팀 공유 클립보드에서 함께 봅니다.";
   const infoLinks = [
     { href: "/about", label: "소개" },
     { href: "/guide", label: "사용법" },
@@ -146,7 +146,7 @@ export function WorkspaceHeader({
             <p className="max-w-3xl text-sm leading-6 text-[#5f6673] sm:text-base">
               <span>{description}</span>
               <br />
-              <span>클립은 로컬에 저장되고, 팀 보드에서 필요할 때만 공유됩니다.</span>
+              <span>클립은 로컬에 저장되고, 팀 공유 클립보드에서 필요할 때만 공유됩니다.</span>
             </p>
           </div>
 
