@@ -40,10 +40,11 @@ export function WorkspaceChooser({
               Start workspace
             </p>
             <h2 className="mt-1 text-2xl font-semibold text-[#18211d]">
-              어떤 클립보드로 시작할까요?
+              공유 클립보드와 개인 메모장 중 선택하세요
             </h2>
             <p className="mt-2 text-sm leading-6 text-[#64756d]">
-              개인 자료와 팀 자료를 분리해서 저장합니다. 언제든 상단에서 전환할 수 있어요.
+              복사 붙여넣기한 링크, 코드, 메모, 이미지를 개인 자료와 팀 자료로
+              나누어 저장합니다. 언제든 상단에서 전환할 수 있어요.
             </p>
           </div>
         </div>
@@ -55,7 +56,7 @@ export function WorkspaceChooser({
           >
             <span className="text-sm font-semibold text-[#18211d]">개인으로 시작</span>
             <span className="mt-2 block text-sm leading-6 text-[#64756d]">
-              내 메모, 코드 조각, 링크를 혼자 정리하는 기본 클립보드입니다.
+              내 메모, 코드 조각, 링크를 혼자 정리하는 복사 붙여넣기 메모장입니다.
             </span>
           </button>
           <button
@@ -64,7 +65,7 @@ export function WorkspaceChooser({
           >
             <span className="text-sm font-semibold text-[#18211d]">새 팀 보드 만들기</span>
             <span className="mt-2 block text-sm leading-6 text-[#64756d]">
-              팀 링크 기준으로 자료 보드를 구분합니다.
+              팀 링크로 같이 쓰는 공유 클립보드를 만듭니다.
             </span>
           </button>
         </div>

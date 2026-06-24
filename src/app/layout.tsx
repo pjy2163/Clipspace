@@ -5,14 +5,51 @@ import "./globals.css";
 const siteUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
   (process.env.NODE_ENV === "production" ? "https://clipspace.co.kr" : "http://localhost:3000");
-const title = "ClipSpace";
-const description = "복사한 링크, 코드, 메모, 이미지를 한곳에 정리합니다.";
+const siteName = "ClipSpace";
+const title = "ClipSpace - 공유 클립보드, 복사 붙여넣기 메모장";
+const description =
+  "복사한 링크, 코드, 메모, 이미지를 개인 클립보드와 팀 공유 클립보드에 저장하고 다시 찾는 온라인 메모장입니다.";
 const previewImage = "/clipspace-preview.png";
+const absolutePreviewImage = `${siteUrl}${previewImage}`;
+const webApplicationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: siteName,
+  alternateName: ["공유 클립보드", "복사 붙여넣기 메모장", "온라인 메모장"],
+  url: siteUrl,
+  image: absolutePreviewImage,
+  description,
+  applicationCategory: "ProductivityApplication",
+  operatingSystem: "Web",
+  inLanguage: "ko-KR",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "KRW",
+  },
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title,
+  applicationName: siteName,
+  title: {
+    default: title,
+    template: `%s | ${siteName}`,
+  },
   description,
+  keywords: [
+    "클립보드",
+    "공유 클립보드",
+    "복사 붙여넣기",
+    "메모장",
+    "온라인 메모장",
+    "링크 저장",
+    "코드 저장",
+    "팀 자료 공유",
+  ],
+  alternates: {
+    canonical: "/",
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "32x32" },
@@ -23,7 +60,7 @@ export const metadata: Metadata = {
     title,
     description,
     url: siteUrl,
-    siteName: "ClipSpace",
+    siteName,
     images: [
       {
         url: previewImage,
@@ -70,6 +107,13 @@ export default function RootLayout({
             gtag('config', 'G-Y14L3YESDV');
           `}
         </Script>
+        <Script
+          id="clipspace-web-application"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(webApplicationJsonLd).replace(/</g, "\\u003c"),
+          }}
+        />
       </head>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

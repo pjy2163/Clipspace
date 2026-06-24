@@ -30,7 +30,7 @@ export function InfoPage({ eyebrow, title, description, children }: InfoPageProp
               <span className="block text-xs font-semibold uppercase tracking-[0.18em] text-[#7a828e]">
                 ClipSpace
               </span>
-              <span className="text-lg font-semibold">클립보드 작업 로그</span>
+              <span className="text-lg font-semibold">공유 클립보드 메모장</span>
             </span>
           </Link>
           <nav className="flex flex-wrap gap-2 text-sm font-semibold text-[#5f6673]">
@@ -74,8 +74,8 @@ export function InfoPage({ eyebrow, title, description, children }: InfoPageProp
             />
           </div>
           <div className="rounded-lg border border-[#e2e5ea] bg-white p-4 text-sm leading-6 text-[#5f6673]">
-            복사한 내용을 카드로 저장하고, 메모를 붙이고, 필요할 때 검색하세요.
-            혼자 쓰는 자료는 로컬에 두고 팀 자료만 링크로 공유할 수 있습니다.
+            복사 붙여넣기한 내용을 카드로 저장하고, 메모를 붙이고, 필요할 때 검색하세요.
+            혼자 쓰는 자료는 개인 클립보드에 두고 팀 자료만 공유 클립보드로 열 수 있습니다.
           </div>
         </aside>
       </section>

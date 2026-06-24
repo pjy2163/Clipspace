@@ -40,7 +40,7 @@ export function Timeline({
         <div>
           <h2 className="text-lg font-semibold text-[#18211d]">Timeline</h2>
           <p className="mt-1 text-sm text-[#5f6673]">
-            복사한 텍스트, 링크, 코드, 이미지를 날짜별로 정리합니다.
+            복사 붙여넣기한 텍스트, 링크, 코드, 이미지를 클립보드 메모장처럼 날짜별로 정리합니다.
           </p>
         </div>
         {clips.length > 0 ? (
@@ -71,7 +71,7 @@ export function Timeline({
               {workspaceCopy[mode].empty}
             </h3>
             <p className="mt-3 text-sm leading-6 text-[#5f6673]">
-              복사 후 가져오기 버튼을 누르거나 Ctrl/Cmd + V로 저장하세요.
+              복사 후 가져오기 버튼을 누르거나 Ctrl/Cmd + V로 클립보드 내용을 저장하세요.
               권한이 막히면 직접 추가 입력칸을 사용할 수 있습니다.
             </p>
           </div>

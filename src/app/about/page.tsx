@@ -2,27 +2,28 @@ import type { Metadata } from "next";
 import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
 
 export const metadata: Metadata = {
-  title: "ClipSpace 소개",
-  description: "복사한 링크, 코드, 메모, 이미지를 다시 찾기 쉽게 모으는 ClipSpace를 소개합니다.",
+  title: "ClipSpace 소개 - 공유 클립보드 메모장",
+  description:
+    "복사 붙여넣기한 링크, 코드, 메모, 이미지를 개인 클립보드와 팀 공유 클립보드에 모으는 ClipSpace를 소개합니다.",
 };
 
 export default function AboutPage() {
   return (
     <InfoPage
-      description="복사한 링크, 코드, 메모, 이미지를 한곳에 모아 다시 찾기 쉽게 정리합니다."
+      description="복사 붙여넣기한 링크, 코드, 메모, 이미지를 한곳에 모아 다시 찾기 쉽게 정리하는 온라인 클립보드 메모장입니다."
       eyebrow="About"
-      title="방금 복사한 자료, 나중에도 바로 찾게"
+      title="방금 복사한 자료를 다시 찾는 공유 클립보드"
     >
       <InfoSection title="이런 불편함을 줄입니다">
         <p>
           자료를 찾다 보면 링크, 코드, 오류 메시지, 캡처 이미지가 계속 생깁니다.
           그런데 한 번 더 복사하는 순간 이전 내용은 금방 사라집니다. ClipSpace는 그런
-          자료를 날짜별 카드로 남겨 다시 꺼내 쓰기 쉽게 만듭니다.
+          자료를 날짜별 카드로 남겨 다시 꺼내 쓰기 쉽게 만드는 복사 붙여넣기 메모장입니다.
         </p>
         <p>
           자동으로 몰래 수집하는 도구가 아니라, 사용자가 가져오기로 선택한 클립만
-          저장합니다. 그래서 개인 자료는 가볍게 보관하고, 필요한 자료만 팀 보드로
-          공유할 수 있습니다.
+          저장합니다. 그래서 개인 자료는 개인 클립보드에 가볍게 보관하고, 필요한
+          자료만 팀 공유 클립보드로 열 수 있습니다.
         </p>
       </InfoSection>
 
@@ -38,7 +39,7 @@ export default function AboutPage() {
         />
       </InfoSection>
 
-      <InfoSection title="개인 보드와 팀 보드">
+      <InfoSection title="개인 클립보드와 팀 공유 클립보드">
         <p>
           개인 보드는 혼자 보는 클립 목록입니다. 브라우저에 저장되기 때문에 로그인
           없이 빠르게 시작할 수 있습니다. 팀 보드는 링크를 만들어 팀원에게 공유하고,
