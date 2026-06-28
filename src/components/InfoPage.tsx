@@ -7,9 +7,6 @@ import { SiteFooter } from "./SiteFooter";
 const navItems = {
   ko: [
     { href: "/", label: "앱" },
-    { href: "/online-clipboard", label: "온라인 클립보드" },
-    { href: "/team-clipboard", label: "팀 클립보드" },
-    { href: "/personal-clipboard", label: "개인 클립보드" },
     { href: "/about", label: "소개" },
     { href: "/guide", label: "사용법" },
     { href: "/privacy", label: "개인정보" },
@@ -17,9 +14,6 @@ const navItems = {
   ],
   en: [
     { href: "/", label: "App" },
-    { href: "/en/online-clipboard", label: "Online clipboard" },
-    { href: "/en/team-clipboard", label: "Team clipboard" },
-    { href: "/en/personal-clipboard", label: "Personal clipboard" },
     { href: "/en/about", label: "About" },
     { href: "/en/guide", label: "Guide" },
     { href: "/en/privacy", label: "Privacy" },

@@ -35,9 +35,6 @@ export function WorkspaceHeader({
       ? "내가 복사한 메모, 코드, 링크를 혼자 쓰는 온라인 클립보드로 정리합니다."
       : "팀 링크로 모은 자료, 레퍼런스, 코드 조각을 팀 공유 클립보드에서 함께 봅니다.";
   const infoLinks = [
-    { href: "/online-clipboard", label: "온라인 클립보드" },
-    { href: "/team-clipboard", label: "팀 클립보드" },
-    { href: "/personal-clipboard", label: "개인 클립보드" },
     { href: "/about", label: "소개" },
     { href: "/guide", label: "사용법" },
     { href: "/privacy", label: "개인정보" },
