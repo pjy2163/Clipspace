@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
+import { InfoList, InfoPage, InfoSection } from "@/components/info/InfoPage";
 
 export const metadata: Metadata = {
   title: "팀 클립보드 - 링크로 같이 쓰는 팀 공유 클립보드",

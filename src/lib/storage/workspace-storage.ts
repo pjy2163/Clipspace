@@ -1,4 +1,4 @@
-import { refreshClipClassification } from "@/lib/clip";
+import { refreshClipClassification } from "@/lib/clipboard/clip";
 import type { Clip, TeamBoard, WorkspaceKey, WorkspaceMode } from "@/types/clip";
 
 const WORKSPACE_KEY = "clipspace.workspace.v1";

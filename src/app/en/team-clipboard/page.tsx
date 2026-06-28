@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
+import { InfoList, InfoPage, InfoSection } from "@/components/info/InfoPage";
 
 export const metadata: Metadata = {
   title: "Team Clipboard and Shared Clipboard - Project links, code, notes, and images",

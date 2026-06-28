@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
+import { InfoList, InfoPage, InfoSection } from "@/components/info/InfoPage";
 
 export const metadata: Metadata = {
   title: "About ClipSpace - Web clipboard, online clipboard, and shared notes",

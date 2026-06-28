@@ -1,8 +1,8 @@
 import { useState } from "react";
 import Image from "next/image";
-import { createTeamWorkspaceKey } from "@/lib/clip";
+import { createTeamWorkspaceKey } from "@/lib/clipboard/clip";
 import type { AppLocale, TeamBoard, WorkspaceKey } from "@/types/clip";
-import { BrandIcon } from "./common";
+import { BrandIcon } from "@/components/common";
 
 const chooserCopy = {
   ko: {

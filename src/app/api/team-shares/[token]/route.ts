@@ -1,5 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { createTeamShareToken, readTeamShareToken } from "@/lib/team-share-token";
+import { createTeamShareToken, readTeamShareToken } from "@/lib/team/team-share-token";
 import type { Clip } from "@/types/clip";
 
 export const runtime = "nodejs";

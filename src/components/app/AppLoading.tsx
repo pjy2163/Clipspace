@@ -1,4 +1,4 @@
-import { BrandIcon } from "./common";
+import { BrandIcon } from "@/components/common";
 import type { AppLocale } from "@/types/clip";
 
 const loadingCopy = {

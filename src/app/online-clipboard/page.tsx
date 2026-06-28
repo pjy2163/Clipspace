@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
+import { InfoList, InfoPage, InfoSection } from "@/components/info/InfoPage";
 
 export const metadata: Metadata = {
   title: "웹 클립보드와 온라인 클립보드 - 복사한 링크와 코드를 다시 찾는 ClipSpace",

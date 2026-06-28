@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Script from "next/script";
-import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
+import { InfoList, InfoPage, InfoSection } from "@/components/info/InfoPage";
 
 const faqItems = [
   {

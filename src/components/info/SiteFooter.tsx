@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BrandIcon } from "./common";
+import { BrandIcon } from "@/components/common";
 
 const footerLinks = {
   ko: [

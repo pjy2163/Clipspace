@@ -5,11 +5,11 @@ import {
   useMemo,
   useState,
 } from "react";
-import { createClip, typeLabelsByLocale } from "@/lib/clip";
-import { copyClipToClipboard } from "@/lib/share";
-import { loadStoredClips, saveWorkspaceState, type StoredState } from "@/lib/storage";
+import { createClip, typeLabelsByLocale } from "@/lib/clipboard/clip";
+import { copyClipToClipboard } from "@/lib/clipboard/share";
+import { loadStoredClips, saveWorkspaceState, type StoredState } from "@/lib/storage/workspace-storage";
 import type { AppLocale, Clip, ClipType } from "@/types/clip";
-import { BrandIcon } from "./common";
+import { BrandIcon } from "@/components/common";
 
 const miniCopy = {
   ko: {

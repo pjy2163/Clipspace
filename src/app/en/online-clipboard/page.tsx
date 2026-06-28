@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
+import { InfoList, InfoPage, InfoSection } from "@/components/info/InfoPage";
 
 export const metadata: Metadata = {
   title: "Web Clipboard and Online Clipboard - Save copied links, code, notes, and images",

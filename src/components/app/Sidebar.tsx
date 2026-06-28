@@ -1,8 +1,8 @@
 import type { KeyboardEvent as ReactKeyboardEvent, RefObject } from "react";
-import { typeLabelsByLocale } from "@/lib/clip";
+import { typeLabelsByLocale } from "@/lib/clipboard/clip";
 import { ui } from "@/styles/ui";
 import type { AppLocale, ClipType } from "@/types/clip";
-import { FilterButton } from "./common";
+import { FilterButton } from "@/components/common";
 
 const sidebarCopy = {
   ko: {

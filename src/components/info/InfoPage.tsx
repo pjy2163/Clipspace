@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { BrandIcon } from "./common";
+import { BrandIcon } from "@/components/common";
 import { SiteFooter } from "./SiteFooter";
 
 const navItems = {

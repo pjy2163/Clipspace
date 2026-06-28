@@ -9,12 +9,12 @@ import {
   useRef,
   useState,
 } from "react";
-import { AppLoading } from "@/components/AppLoading";
-import { Sidebar } from "@/components/Sidebar";
-import { SiteFooter } from "@/components/SiteFooter";
-import { Timeline } from "@/components/Timeline";
-import { WorkspaceChooser } from "@/components/WorkspaceChooser";
-import { WorkspaceHeader } from "@/components/WorkspaceHeader";
+import { AppLoading } from "@/components/app/AppLoading";
+import { Sidebar } from "@/components/app/Sidebar";
+import { SiteFooter } from "@/components/info/SiteFooter";
+import { Timeline } from "@/components/app/Timeline";
+import { WorkspaceChooser } from "@/components/app/WorkspaceChooser";
+import { WorkspaceHeader } from "@/components/app/WorkspaceHeader";
 import {
   createClip,
   createImageClip,
@@ -24,15 +24,15 @@ import {
   makeId,
   normalizeContent,
   workspaceCopyByLocale,
-} from "@/lib/clip";
-import { getPastedImageFiles, readImageBlob } from "@/lib/image";
+} from "@/lib/clipboard/clip";
+import { getPastedImageFiles, readImageBlob } from "@/lib/clipboard/image";
 import {
   hasStoredWorkspace,
   loadStoredClips,
   loadWorkspaceMode,
   saveWorkspaceState,
   type StoredState,
-} from "@/lib/storage";
+} from "@/lib/storage/workspace-storage";
 import {
   createRemoteTeamBoard,
   deleteRemoteTeamBoard,
@@ -40,7 +40,7 @@ import {
   loadRemoteTeamBoard,
   type RemoteTeamBoard,
   saveRemoteTeamClips,
-} from "@/lib/team-api";
+} from "@/lib/team/team-api";
 import { ui } from "@/styles/ui";
 import type {
   AppLocale,

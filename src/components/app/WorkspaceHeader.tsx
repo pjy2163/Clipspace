@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { createTeamWorkspaceKey, getWorkspaceMode, workspaceCopyByLocale } from "@/lib/clip";
+import { createTeamWorkspaceKey, getWorkspaceMode, workspaceCopyByLocale } from "@/lib/clipboard/clip";
 import type { AppLocale, TeamBoard, WorkspaceKey } from "@/types/clip";
-import { BrandIcon, ModeButton, Stat } from "./common";
+import { BrandIcon, ModeButton, Stat } from "@/components/common";
 
 const headerCopy = {
   ko: {

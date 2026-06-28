@@ -5,9 +5,9 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   useState,
 } from "react";
-import { typeLabelsByLocale, typeTone } from "@/lib/clip";
-import { getPastedImageFiles, readImageBlob } from "@/lib/image";
-import { copyClipToClipboard } from "@/lib/share";
+import { typeLabelsByLocale, typeTone } from "@/lib/clipboard/clip";
+import { getPastedImageFiles, readImageBlob } from "@/lib/clipboard/image";
+import { copyClipToClipboard } from "@/lib/clipboard/share";
 import { ui } from "@/styles/ui";
 import type { AppLocale, Clip, ClipImage } from "@/types/clip";
 

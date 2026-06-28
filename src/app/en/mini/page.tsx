@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MiniClipboard } from "@/components/MiniClipboard";
+import { MiniClipboard } from "@/components/app/MiniClipboard";
 
 export const metadata: Metadata = {
   title: "ClipSpace mini clipboard",

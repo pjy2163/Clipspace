@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { getWorkspaceMode, workspaceCopyByLocale } from "@/lib/clip";
+import { getWorkspaceMode, workspaceCopyByLocale } from "@/lib/clipboard/clip";
 import { ui } from "@/styles/ui";
 import type { AppLocale, Clip, ClipImage, WorkspaceKey } from "@/types/clip";
 import { ClipCard } from "./ClipCard";
