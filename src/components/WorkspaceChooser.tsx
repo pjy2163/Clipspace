@@ -20,6 +20,9 @@ const chooserCopy = {
     existingTeams: "기존 팀 보드",
     sharedLink: "공유 링크 사용",
     open: "열기",
+    languageHref: "/en/app",
+    languageLabel: "English",
+    languageTitle: "영어 버전으로 전환",
   },
   en: {
     eyebrow: "Start workspace",
@@ -36,6 +39,9 @@ const chooserCopy = {
     existingTeams: "Existing team boards",
     sharedLink: "Shared link",
     open: "Open",
+    languageHref: "/",
+    languageLabel: "한국어",
+    languageTitle: "Switch to Korean",
   },
 };
 
@@ -59,6 +65,15 @@ export function WorkspaceChooser({
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-[#18211d]/35 px-4 backdrop-blur-sm">
       <section className="max-h-[88vh] w-full max-w-3xl overflow-auto rounded-lg border border-[#d8dfda] bg-white p-5 shadow-2xl">
+        <div className="mb-3 flex justify-end">
+          <a
+            className="rounded-md border border-[#d7dce5] px-2.5 py-1.5 text-xs font-semibold text-[#354052] transition hover:border-[#9aa7bd] hover:bg-[#f7f9fc]"
+            href={copy.languageHref}
+            title={copy.languageTitle}
+          >
+            {copy.languageLabel}
+          </a>
+        </div>
         <div className="mb-5 overflow-hidden rounded-lg border border-[#e2e8f3] bg-[#f7faff]">
           <Image
             alt=""

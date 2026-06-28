@@ -13,6 +13,9 @@ const headerCopy = {
       { href: "/privacy", label: "개인정보" },
       { href: "/use-cases", label: "활용 사례" },
     ],
+    languageHref: "/en/app",
+    languageLabel: "EN",
+    languageTitle: "영어 버전으로 전환",
     refreshLabel: "ClipSpace 새로고침",
     refreshTitle: "새로고침",
     navLabel: "ClipSpace 안내 페이지",
@@ -38,6 +41,9 @@ const headerCopy = {
       { href: "/en/privacy", label: "Privacy" },
       { href: "/en/use-cases", label: "Use cases" },
     ],
+    languageHref: "/",
+    languageLabel: "KO",
+    languageTitle: "Switch to Korean",
     refreshLabel: "Refresh ClipSpace",
     refreshTitle: "Refresh",
     navLabel: "ClipSpace info pages",
@@ -130,6 +136,14 @@ export function WorkspaceHeader({
                 {item.label}
               </Link>
             ))}
+            <Link
+              aria-label={copy.languageTitle}
+              className="grid size-9 place-items-center rounded-md border border-[#d7dce5] text-xs font-semibold text-[#354052] transition hover:border-[#9aa7bd] hover:bg-[#f7f9fc] hover:text-[#202124]"
+              href={copy.languageHref}
+              title={copy.languageTitle}
+            >
+              {copy.languageLabel}
+            </Link>
           </nav>
 
           <div className="flex w-fit flex-nowrap items-center gap-1 rounded-full border border-[#e2e5ea] bg-[#f6f7f9] p-1">
