@@ -23,6 +23,9 @@ const headerCopy = {
     teamSelectLabel: "팀 보드 선택",
     teamSelectPlaceholder: "팀 선택",
     createTeam: "팀 생성",
+    miniWindow: "미니 창",
+    miniWindowTitle: "작은 미니 클립보드 창 열기",
+    miniWindowPath: "/mini",
     copyLink: "링크 복사",
     deleteTeam: "팀 삭제",
     privacyLine: "클립은 로컬에 저장되고, 팀 공유 클립보드에서 필요할 때만 공유됩니다.",
@@ -51,6 +54,9 @@ const headerCopy = {
     teamSelectLabel: "Select team board",
     teamSelectPlaceholder: "Select team",
     createTeam: "Create team",
+    miniWindow: "Mini",
+    miniWindowTitle: "Open mini clipboard window",
+    miniWindowPath: "/en/mini",
     copyLink: "Copy link",
     deleteTeam: "Delete team",
     privacyLine: "Clips stay local, and are shared only when you use a team shared clipboard.",
@@ -102,6 +108,41 @@ export function WorkspaceHeader({
     const name = window.prompt(copy.promptTeamName);
     if (name === null) return;
     onCreateTeamBoard(name);
+  };
+  const openPopupMiniWindow = () => {
+    const miniWindow = window.open(
+      copy.miniWindowPath,
+      "clipspace-mini",
+      "popup=yes,width=420,height=680,noopener,noreferrer",
+    );
+    miniWindow?.focus();
+  };
+  const openMiniWindow = async () => {
+    if (!window.documentPictureInPicture) {
+      openPopupMiniWindow();
+      return;
+    }
+
+    try {
+      const pipWindow = await window.documentPictureInPicture.requestWindow({
+        width: 420,
+        height: 680,
+      });
+      pipWindow.document.title = "ClipSpace mini";
+      pipWindow.document.body.style.margin = "0";
+      pipWindow.document.body.style.overflow = "hidden";
+
+      const iframe = pipWindow.document.createElement("iframe");
+      iframe.src = new URL(copy.miniWindowPath, window.location.origin).toString();
+      iframe.title = copy.miniWindowTitle;
+      iframe.sandbox.add("allow-scripts", "allow-same-origin");
+      iframe.style.border = "0";
+      iframe.style.width = "100vw";
+      iframe.style.height = "100vh";
+      pipWindow.document.body.append(iframe);
+    } catch {
+      openPopupMiniWindow();
+    }
   };
 
   return (
@@ -179,6 +220,14 @@ export function WorkspaceHeader({
               type="button"
             >
               {copy.createTeam}
+            </button>
+            <button
+              className="whitespace-nowrap rounded-full px-3 py-2 text-sm font-semibold text-[#5f6673] transition hover:bg-white hover:text-[#202124]"
+              onClick={() => void openMiniWindow()}
+              title={copy.miniWindowTitle}
+              type="button"
+            >
+              {copy.miniWindow}
             </button>
             {mode === "team" ? (
               <>

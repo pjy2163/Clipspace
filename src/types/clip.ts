@@ -51,3 +51,13 @@ export type TeamBoard = {
   accessKey?: string;
   shareToken?: string;
 };
+
+export type DocumentPictureInPicture = {
+  requestWindow(options?: { width?: number; height?: number }): Promise<Window>;
+};
+
+declare global {
+  interface Window {
+    documentPictureInPicture?: DocumentPictureInPicture;
+  }
+}

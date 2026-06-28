@@ -12,7 +12,7 @@ const nextConfig: NextConfig = {
       ? `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${analyticsScriptSources}`
       : `script-src 'self' 'unsafe-inline' ${analyticsScriptSources}`;
 
-    const securityHeaders = [
+    const createSecurityHeaders = (frameAncestors: "'none'" | "'self'", xFrameOptions: "DENY" | "SAMEORIGIN") => [
       {
         key: "Content-Security-Policy",
         value: [
@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
           "object-src 'none'",
           "base-uri 'self'",
           "form-action 'self'",
-          "frame-ancestors 'none'",
+          `frame-ancestors ${frameAncestors}`,
           "upgrade-insecure-requests",
         ].join("; "),
       },
@@ -39,7 +39,7 @@ const nextConfig: NextConfig = {
       },
       {
         key: "X-Frame-Options",
-        value: "DENY",
+        value: xFrameOptions,
       },
       {
         key: "Permissions-Policy",
@@ -47,9 +47,20 @@ const nextConfig: NextConfig = {
       },
     ];
 
+    const securityHeaders = createSecurityHeaders("'none'", "DENY");
+    const miniWindowHeaders = createSecurityHeaders("'self'", "SAMEORIGIN");
+
     return [
       {
-        source: "/(.*)",
+        source: "/mini",
+        headers: miniWindowHeaders,
+      },
+      {
+        source: "/en/mini",
+        headers: miniWindowHeaders,
+      },
+      {
+        source: "/((?!mini$|en/mini$).*)",
         headers: securityHeaders,
       },
     ];
