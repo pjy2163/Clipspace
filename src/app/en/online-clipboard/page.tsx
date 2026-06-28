@@ -2,20 +2,20 @@ import type { Metadata } from "next";
 import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
 
 export const metadata: Metadata = {
-  title: "Online Clipboard - Save copied links, code, notes, and images",
+  title: "Web Clipboard and Online Clipboard - Save copied links, code, notes, and images",
   description:
-    "ClipSpace is an online clipboard for saving copied links, code snippets, notes, and images as searchable cards.",
+    "ClipSpace is a web clipboard and online clipboard for saving copied links, code snippets, notes, and images as searchable cards.",
 };
 
 export default function EnglishOnlineClipboardPage() {
   return (
     <InfoPage
-      description="A web-based clipboard workspace for saving copied links, code, notes, and images without installing anything."
+      description="A web clipboard and online clipboard for saving copied links, code, notes, and images without installing anything."
       eyebrow="Online clipboard"
       locale="en"
-      title="An online clipboard for material you need again"
+      title="A web clipboard for material you need again"
     >
-      <InfoSection title="Why an online clipboard helps">
+      <InfoSection title="Why a web clipboard helps">
         <p>
           Research, development, and writing often create a trail of copied links, commands, error
           messages, and quick notes. After the next copy, useful material can disappear from view.
@@ -23,7 +23,8 @@ export default function EnglishOnlineClipboardPage() {
         </p>
         <p>
           The personal workflow is local-first: you can start without login, and personal clips stay
-          in your browser by default.
+          in your browser by default. When material should be shared, you can open a shared clipboard
+          or team clipboard board by link.
         </p>
       </InfoSection>
 
@@ -41,8 +42,8 @@ export default function EnglishOnlineClipboardPage() {
 
       <InfoSection title="From personal use to team boards">
         <p>
-          Keep private material in your personal online clipboard, then create a shared team board
-          when collaborators need the same references, snippets, and notes.
+          Keep private material in your personal online clipboard, then create a shared clipboard or
+          team clipboard board when collaborators need the same references, snippets, and notes.
         </p>
       </InfoSection>
     </InfoPage>

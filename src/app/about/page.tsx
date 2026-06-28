@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
 
 export const metadata: Metadata = {
-  title: "ClipSpace 소개 - 온라인 클립보드와 공유 메모장",
+  title: "ClipSpace 소개 - 웹 클립보드, 온라인 클립보드와 공유 메모장",
   description:
-    "복사 붙여넣기한 링크, 코드, 메모, 이미지를 개인 온라인 클립보드와 팀 공유 클립보드에 모으는 ClipSpace를 소개합니다.",
+    "복사 붙여넣기한 링크, 코드, 메모, 이미지를 웹 클립보드, 개인 온라인 클립보드, 팀 공유 클립보드에 모으는 ClipSpace를 소개합니다.",
 };
 
 export default function AboutPage() {
   return (
     <InfoPage
-      description="복사 붙여넣기한 링크, 코드, 메모, 이미지를 한곳에 모아 다시 찾기 쉽게 정리하는 온라인 클립보드 메모장입니다."
+      description="복사 붙여넣기한 링크, 코드, 메모, 이미지를 한곳에 모아 다시 찾기 쉽게 정리하는 웹 클립보드이자 온라인 클립보드 메모장입니다."
       eyebrow="About"
       title="방금 복사한 자료를 다시 찾는 온라인 클립보드"
     >
@@ -18,7 +18,7 @@ export default function AboutPage() {
         <p>
           자료를 찾다 보면 링크, 코드, 오류 메시지, 캡처 이미지가 계속 생깁니다.
           그런데 한 번 더 복사하는 순간 이전 내용은 금방 사라집니다. ClipSpace는 그런
-          자료를 날짜별 카드로 남겨 다시 꺼내 쓰기 쉽게 만드는 온라인 클립보드입니다.
+          자료를 날짜별 카드로 남겨 다시 꺼내 쓰기 쉽게 만드는 웹 클립보드입니다.
         </p>
         <p>
           자동으로 몰래 수집하는 도구가 아니라, 사용자가 가져오기로 선택한 클립만

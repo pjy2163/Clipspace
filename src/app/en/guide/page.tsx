@@ -10,7 +10,7 @@ const faqItems = [
   {
     question: "What is the difference between personal and team boards?",
     answer:
-      "Personal boards are for your own browser. Team boards can be shared by link so collaborators can use the same clipboard workspace.",
+      "Personal boards are for your own browser. Team clipboard boards can be shared by link so collaborators can use the same shared clipboard workspace.",
   },
   {
     question: "What can I search?",
@@ -33,18 +33,18 @@ const faqJsonLd = {
 };
 
 export const metadata: Metadata = {
-  title: "ClipSpace Guide - Save and search copied clipboard material",
+  title: "ClipSpace Guide - Save and search web clipboard material",
   description:
-    "How to save copied links, code, notes, and images in ClipSpace and share team clipboard boards.",
+    "How to save copied links, code, notes, and images in ClipSpace's web clipboard, online clipboard, and team shared clipboard boards.",
 };
 
 export default function EnglishGuidePage() {
   return (
     <InfoPage
-      description="Copy, paste, save, and search. ClipSpace keeps only the clips you choose to import."
+      description="Copy, paste, save, and search. ClipSpace keeps only the web clipboard material you choose to import."
       eyebrow="Guide"
       locale="en"
-      title="How to turn copied material into searchable cards"
+      title="How to turn copied material into searchable clipboard cards"
     >
       <InfoSection title="1. Copy and import">
         <p>
@@ -77,8 +77,8 @@ export default function EnglishGuidePage() {
 
       <InfoSection title="4. Share with a team">
         <p>
-          Create a team board and copy its link when you want teammates to collect references,
-          meeting material, screenshots, or snippets in one place.
+          Create a team clipboard board and copy its link when you want teammates to collect
+          references, meeting material, screenshots, or snippets in one shared clipboard.
         </p>
       </InfoSection>
 

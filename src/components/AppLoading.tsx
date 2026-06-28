@@ -4,16 +4,16 @@ import type { AppLocale } from "@/types/clip";
 const loadingCopy = {
   ko: {
     brand: "ClipSpace 클립스페이스",
-    title: "온라인 클립보드와 공유 메모장",
+    title: "웹 클립보드와 공유 메모장",
     description:
-      "클립스페이스는 복사한 링크, 코드, 메모, 이미지를 개인 온라인 클립보드와 팀 공유 클립보드에 저장하고 검색해서 다시 찾는 온라인 메모장입니다.",
+      "클립스페이스는 복사한 링크, 코드, 메모, 이미지를 웹 클립보드, 개인 온라인 클립보드, 팀 공유 클립보드에 저장하고 검색해서 다시 찾는 온라인 메모장입니다.",
     status: "작업 공간을 불러오는 중입니다.",
   },
   en: {
     brand: "ClipSpace",
-    title: "Online clipboard and shared notes",
+    title: "Web clipboard and shared notes",
     description:
-      "ClipSpace saves copied links, code, notes, and images in a personal online clipboard or team shared clipboard so you can find them again.",
+      "ClipSpace saves copied links, code, notes, and images in a personal online clipboard, web clipboard, or team shared clipboard so you can find them again.",
     status: "Loading your workspace.",
   },
 };

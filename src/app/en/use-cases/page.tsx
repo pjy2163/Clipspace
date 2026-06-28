@@ -2,23 +2,23 @@ import type { Metadata } from "next";
 import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
 
 export const metadata: Metadata = {
-  title: "ClipSpace Use Cases - Shared clipboard and online notes",
+  title: "ClipSpace Use Cases - Web clipboard, shared clipboard, and online notes",
   description:
-    "Ways to use ClipSpace for studying, development, research, writing, and small team projects.",
+    "Ways to use ClipSpace as a web clipboard, online clipboard, shared clipboard, and team clipboard for studying, development, research, writing, and small projects.",
 };
 
 export default function EnglishUseCasesPage() {
   return (
     <InfoPage
-      description="ClipSpace is useful when you copy many useful things but keep losing where they went."
+      description="ClipSpace is useful when you need a web clipboard for useful things you copy but keep losing."
       eyebrow="Use cases"
       locale="en"
-      title="When a shared clipboard board helps"
+      title="When an online clipboard board helps"
     >
       <InfoSection title="Development and learning">
         <p>
-          Save snippets, error messages, commands, and documentation links while learning or
-          debugging. Later, search the board to find the context again.
+          Save snippets, error messages, commands, and documentation links in an online clipboard
+          while learning or debugging. Later, search the board to find the context again.
         </p>
         <InfoList
           items={[
@@ -38,8 +38,8 @@ export default function EnglishUseCasesPage() {
 
       <InfoSection title="Team projects">
         <p>
-          A team board can hold meeting references, screenshots, and project snippets before or
-          after a discussion.
+          A team clipboard board can hold meeting references, screenshots, and project snippets
+          before or after a discussion, so the shared clipboard remains useful after chat moves on.
         </p>
       </InfoSection>
 

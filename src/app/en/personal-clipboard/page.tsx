@@ -2,24 +2,24 @@ import type { Metadata } from "next";
 import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
 
 export const metadata: Metadata = {
-  title: "Personal Clipboard - Save copied material in your browser",
+  title: "Personal Clipboard and Online Clipboard - Save copied material in your browser",
   description:
-    "ClipSpace personal clipboard stores copied links, code snippets, notes, and images locally in your browser so you can search them later.",
+    "ClipSpace personal clipboard is a local-first online clipboard for copied links, code snippets, notes, and images you want to search later.",
 };
 
 export default function EnglishPersonalClipboardPage() {
   return (
     <InfoPage
-      description="A local-first personal clipboard for saving copied links, code, notes, and images in your browser."
+      description="A local-first personal clipboard and online clipboard for saving copied links, code, notes, and images in your browser."
       eyebrow="Personal clipboard"
       locale="en"
-      title="A personal clipboard for your copied material"
+      title="A personal online clipboard for your copied material"
     >
       <InfoSection title="What the personal clipboard solves">
         <p>
           While studying, debugging, or collecting references, copied material can pile up quickly.
-          ClipSpace lets you save selected clips in your browser and search them later by content,
-          title, category, and memo text.
+          ClipSpace gives you a personal web clipboard for selected clips, then lets you search
+          them later by content, title, category, and memo text.
         </p>
         <p>
           You can start without login. Personal clips use browser IndexedDB storage and are not sent

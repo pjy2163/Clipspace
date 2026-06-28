@@ -4,20 +4,20 @@ import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
 export const metadata: Metadata = {
   title: "팀 클립보드 - 링크로 같이 쓰는 팀 공유 클립보드",
   description:
-    "ClipSpace 팀 클립보드는 프로젝트 링크, 코드 조각, 회의 자료, 참고 이미지를 팀원과 함께 모으는 공유 클립보드입니다.",
+    "ClipSpace 팀 클립보드는 프로젝트 링크, 코드 조각, 회의 자료, 참고 이미지를 팀원과 함께 모으는 공유 클립보드이자 팀 공유 클립보드입니다.",
 };
 
 export default function TeamClipboardPage() {
   return (
     <InfoPage
-      description="팀 링크 하나로 프로젝트 자료, 코드 조각, 회의 참고 자료를 함께 모으는 팀 공유 클립보드입니다."
+      description="팀 링크 하나로 프로젝트 자료, 코드 조각, 회의 참고 자료를 함께 모으는 팀 클립보드이자 팀 공유 클립보드입니다."
       eyebrow="Team clipboard"
       title="팀원이 같이 쓰는 팀 공유 클립보드"
     >
       <InfoSection title="팀 클립보드가 필요한 순간">
         <p>
           프로젝트를 하다 보면 각자 찾은 링크, 코드 조각, 캡처 이미지, 회의 자료가
-          여러 채팅방과 문서에 흩어집니다. ClipSpace 팀 클립보드는 팀 링크를 기준으로
+          여러 채팅방과 문서에 흩어집니다. ClipSpace 팀 클립보드는 공유 클립보드 링크를 기준으로
           같은 보드에 자료를 모아 다시 찾기 쉽게 정리합니다.
         </p>
         <p>

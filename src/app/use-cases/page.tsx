@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
 
 export const metadata: Metadata = {
-  title: "ClipSpace 활용 사례 - 온라인 클립보드와 공유 메모장",
+  title: "ClipSpace 활용 사례 - 웹 클립보드, 온라인 클립보드와 공유 메모장",
   description:
-    "공부, 개발, 자료 조사, 팀 프로젝트에서 온라인 클립보드와 공유 클립보드로 ClipSpace를 쓰기 좋은 상황입니다.",
+    "공부, 개발, 자료 조사, 팀 프로젝트에서 웹 클립보드, 온라인 클립보드, 공유 클립보드로 ClipSpace를 쓰기 좋은 상황입니다.",
 };
 
 export default function UseCasesPage() {
   return (
     <InfoPage
-      description="복사할 것은 많은데 어디에 뒀는지 자주 잊는 작업에 잘 맞는 온라인 클립보드 저장 도구입니다."
+      description="복사할 것은 많은데 어디에 뒀는지 자주 잊는 작업에 잘 맞는 웹 클립보드 저장 도구입니다."
       eyebrow="Use cases"
       title="온라인 클립보드가 필요한 순간"
     >
@@ -18,7 +18,7 @@ export default function UseCasesPage() {
         <p>
           알고리즘 풀이, 디버깅, 라이브러리 설정을 하다 보면 코드 조각과 에러 메시지를
           자주 복사합니다. ClipSpace에 모아두면 방금 참고한 코드와 링크를
-          온라인 클립보드처럼 다시 찾기 쉽습니다.
+          웹 클립보드처럼 다시 찾기 쉽습니다.
         </p>
         <InfoList
           items={[
@@ -40,7 +40,7 @@ export default function UseCasesPage() {
       <InfoSection title="팀 프로젝트">
         <p>
           팀 링크 보드에 레퍼런스와 캡처 이미지를 모으면 회의 전에 자료를 다시 찾는
-          시간을 줄일 수 있습니다. 간단한 공유 클립보드와 공유 자료함처럼 쓸 수 있습니다.
+          시간을 줄일 수 있습니다. 간단한 공유 클립보드, 팀 클립보드, 공유 자료함처럼 쓸 수 있습니다.
         </p>
       </InfoSection>
 

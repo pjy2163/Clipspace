@@ -2,18 +2,18 @@ import type { Metadata } from "next";
 import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
 
 export const metadata: Metadata = {
-  title: "ClipSpace - Shared clipboard notes for links, code, and images",
+  title: "ClipSpace - Web clipboard, online clipboard, and shared clipboard notes",
   description:
-    "ClipSpace helps you save copied links, code snippets, notes, and images in personal or team clipboard boards.",
+    "ClipSpace helps you save copied links, code snippets, notes, and images in a web clipboard, online clipboard, or team shared clipboard.",
 };
 
 export default function EnglishHomePage() {
   return (
     <InfoPage
-      description="A lightweight clipboard workspace for saving copied links, code, notes, and screenshots so you can find them again later."
+      description="A lightweight web clipboard for saving copied links, code, notes, and screenshots so you can find them again later."
       eyebrow="ClipSpace"
       locale="en"
-      title="Shared clipboard notes for work, study, and teams"
+      title="Web clipboard notes for work, study, and teams"
     >
       <InfoSection title="What ClipSpace is for">
         <p>
@@ -23,7 +23,8 @@ export default function EnglishHomePage() {
         </p>
         <p>
           It is not a background clipboard monitor. You decide what to import, keep personal clips
-          in your browser, and create team boards only when you want to share material with others.
+          in your browser, and create team clipboard boards only when you want to share material
+          with others.
         </p>
       </InfoSection>
 

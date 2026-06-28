@@ -2,17 +2,17 @@ import type { Metadata } from "next";
 import { InfoList, InfoPage, InfoSection } from "@/components/InfoPage";
 
 export const metadata: Metadata = {
-  title: "온라인 클립보드 - 복사한 링크와 코드를 다시 찾는 ClipSpace",
+  title: "웹 클립보드와 온라인 클립보드 - 복사한 링크와 코드를 다시 찾는 ClipSpace",
   description:
-    "ClipSpace 온라인 클립보드는 복사한 링크, 코드, 메모, 이미지를 카드로 저장하고 검색해서 다시 찾는 웹 클립보드입니다.",
+    "ClipSpace는 복사한 링크, 코드, 메모, 이미지를 카드로 저장하고 검색해서 다시 찾는 웹 클립보드이자 온라인 클립보드입니다.",
 };
 
 export default function OnlineClipboardPage() {
   return (
     <InfoPage
-      description="설치 없이 웹에서 복사한 링크, 코드, 메모, 이미지를 저장하고 필요할 때 검색하는 온라인 클립보드입니다."
+      description="설치 없이 웹에서 복사한 링크, 코드, 메모, 이미지를 저장하고 필요할 때 검색하는 웹 클립보드이자 온라인 클립보드입니다."
       eyebrow="Online clipboard"
-      title="복사한 자료를 다시 찾는 온라인 클립보드"
+      title="복사한 자료를 다시 찾는 웹 클립보드"
     >
       <InfoSection title="온라인 클립보드가 필요한 이유">
         <p>
@@ -22,8 +22,9 @@ export default function OnlineClipboardPage() {
           찾기 쉽게 만듭니다.
         </p>
         <p>
-          브라우저에서 바로 열 수 있는 웹 기반 도구라 별도 설치 없이 시작할 수 있고,
-          개인 자료는 내 브라우저에 저장하는 로컬 우선 흐름을 유지합니다.
+          브라우저에서 바로 열 수 있는 웹 클립보드라 별도 설치 없이 시작할 수 있고,
+          개인 자료는 내 브라우저에 저장하는 로컬 우선 흐름을 유지합니다. 팀과 같이
+          봐야 하는 자료는 공유 클립보드나 팀 클립보드로 확장할 수 있습니다.
         </p>
       </InfoSection>
 
