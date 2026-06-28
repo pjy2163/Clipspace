@@ -13,6 +13,9 @@ const footerLinks = {
     { href: "/en", label: "English" },
   ],
   en: [
+    { href: "/en/online-clipboard", label: "Online clipboard" },
+    { href: "/en/team-clipboard", label: "Team clipboard" },
+    { href: "/en/personal-clipboard", label: "Personal clipboard" },
     { href: "/en/about", label: "About" },
     { href: "/en/guide", label: "Guide" },
     { href: "/en/privacy", label: "Privacy" },
