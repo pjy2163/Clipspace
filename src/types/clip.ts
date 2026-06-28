@@ -1,5 +1,7 @@
 export type ClipType = "text" | "link" | "code" | "contact" | "sensitive" | "image";
 
+export type AppLocale = "ko" | "en";
+
 export type WorkspaceMode = "personal" | "team";
 export type WorkspaceKey = "personal" | `team:${string}`;
 

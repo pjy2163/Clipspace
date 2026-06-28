@@ -1,12 +1,32 @@
 import Image from "next/image";
-import { getWorkspaceMode, workspaceCopy } from "@/lib/clip";
+import { getWorkspaceMode, workspaceCopyByLocale } from "@/lib/clip";
 import { ui } from "@/styles/ui";
-import type { Clip, ClipImage, WorkspaceKey } from "@/types/clip";
+import type { AppLocale, Clip, ClipImage, WorkspaceKey } from "@/types/clip";
 import { ClipCard } from "./ClipCard";
+
+const timelineCopy = {
+  ko: {
+    description:
+      "복사 붙여넣기한 텍스트, 링크, 코드, 이미지를 클립보드 메모장처럼 날짜별로 정리합니다.",
+    clearSuffix: "보드 비우기",
+    emptyHelp:
+      "복사 후 가져오기 버튼을 누르거나 Ctrl/Cmd + V로 클립보드 내용을 저장하세요. 권한이 막히면 직접 추가 입력칸을 사용할 수 있습니다.",
+    countSuffix: "개",
+  },
+  en: {
+    description:
+      "Organize pasted text, links, code, and images by date like a searchable clipboard notebook.",
+    clearSuffix: "clear board",
+    emptyHelp:
+      "Copy something, then use the import button or Ctrl/Cmd + V to save clipboard content. If permission is blocked, use the manual input.",
+    countSuffix: "clips",
+  },
+};
 
 type TimelineProps = {
   clips: Clip[];
   groupedClips: Record<string, Clip[]>;
+  locale?: AppLocale;
   workspace: WorkspaceKey;
   onAddNote: (id: string, text: string, image?: ClipImage) => void;
   onClearWorkspace: () => void;
@@ -19,6 +39,7 @@ type TimelineProps = {
 export function Timeline({
   clips,
   groupedClips,
+  locale = "ko",
   workspace,
   onAddNote,
   onClearWorkspace,
@@ -28,6 +49,8 @@ export function Timeline({
   onToggleFavorite,
 }: TimelineProps) {
   const mode = getWorkspaceMode(workspace);
+  const copy = timelineCopy[locale];
+  const workspaceCopy = workspaceCopyByLocale[locale];
 
   return (
     <section
@@ -40,7 +63,7 @@ export function Timeline({
         <div>
           <h2 className="text-lg font-semibold text-[#18211d]">Timeline</h2>
           <p className="mt-1 text-sm text-[#5f6673]">
-            복사 붙여넣기한 텍스트, 링크, 코드, 이미지를 클립보드 메모장처럼 날짜별로 정리합니다.
+            {copy.description}
           </p>
         </div>
         {clips.length > 0 ? (
@@ -48,7 +71,7 @@ export function Timeline({
             className={ui.button.quiet}
             onClick={onClearWorkspace}
           >
-            {workspaceCopy[mode].label} 보드 비우기
+            {workspaceCopy[mode].label} {copy.clearSuffix}
           </button>
         ) : null}
       </div>
@@ -71,8 +94,7 @@ export function Timeline({
               {workspaceCopy[mode].empty}
             </h3>
             <p className="mt-3 text-sm leading-6 text-[#5f6673]">
-              복사 후 가져오기 버튼을 누르거나 Ctrl/Cmd + V로 클립보드 내용을 저장하세요.
-              권한이 막히면 직접 추가 입력칸을 사용할 수 있습니다.
+              {copy.emptyHelp}
             </p>
           </div>
         </div>
@@ -83,13 +105,18 @@ export function Timeline({
               <div className={ui.timeline.dayHeader}>
                 <h3 className="text-sm font-semibold text-[#354052]">{day}</h3>
                 <div className={ui.timeline.divider} />
-                <span className="text-xs text-[#788980]">{dayClips.length}개</span>
+                <span className="text-xs text-[#788980]">
+                  {dayClips.length}
+                  {locale === "ko" ? "" : " "}
+                  {copy.countSuffix}
+                </span>
               </div>
               <div className={ui.timeline.grid}>
                 {dayClips.map((clip) => (
                   <ClipCard
                     clip={clip}
                     key={clip.id}
+                    locale={locale}
                     onAddNote={onAddNote}
                     onRemove={onRemove}
                     onRemoveNote={onRemoveNote}

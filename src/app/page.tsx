@@ -23,7 +23,7 @@ import {
   getWorkspaceMode,
   makeId,
   normalizeContent,
-  workspaceCopy,
+  workspaceCopyByLocale,
 } from "@/lib/clip";
 import { getPastedImageFiles, readImageBlob } from "@/lib/image";
 import {
@@ -42,7 +42,15 @@ import {
   saveRemoteTeamClips,
 } from "@/lib/team-api";
 import { ui } from "@/styles/ui";
-import type { Clip, ClipImage, ClipSource, ClipType, TeamBoard, WorkspaceKey } from "@/types/clip";
+import type {
+  AppLocale,
+  Clip,
+  ClipImage,
+  ClipSource,
+  ClipType,
+  TeamBoard,
+  WorkspaceKey,
+} from "@/types/clip";
 
 function isEditableTarget(target: EventTarget | null) {
   if (!(target instanceof HTMLElement)) return false;
@@ -50,8 +58,8 @@ function isEditableTarget(target: EventTarget | null) {
   return tagName === "textarea" || tagName === "input" || target.isContentEditable;
 }
 
-function formatDay(date: string) {
-  return new Intl.DateTimeFormat("ko-KR", {
+function formatDay(date: string, locale: AppLocale) {
+  return new Intl.DateTimeFormat(locale === "ko" ? "ko-KR" : "en-US", {
     month: "long",
     day: "numeric",
     weekday: "short",
@@ -63,6 +71,89 @@ const LEGACY_LAYOUT_KEY = "cliplog.layout.sidebarWidth.v1";
 const DEFAULT_SIDEBAR_WIDTH = 280;
 const MIN_SIDEBAR_WIDTH = 220;
 const MAX_SIDEBAR_WIDTH = 420;
+
+const appCopy = {
+  ko: {
+    initialStatus: "복사한 뒤 이 화면을 클릭하거나 Cmd/Ctrl + V를 누르세요.",
+    teamLoaded: (name: string) => `${name} 팀 보드를 불러왔어요.`,
+    teamLoadFailed: "팀 링크를 불러오지 못했어요. 링크가 맞는지 확인해 주세요.",
+    missingTeamKey: "팀 링크에 접근키가 없어요. 팀에서 링크를 다시 복사해 주세요.",
+    storageLoadFailed: "저장소를 불러오지 못했어요. 브라우저 저장 공간을 확인해 주세요.",
+    storageSaveFailed: "저장소에 기록하지 못했어요. 브라우저 저장 공간을 확인해 주세요.",
+    teamSyncFailed: "팀 보드를 Supabase에 동기화하지 못했어요.",
+    teamUpdatesAvailable: "팀 보드에 새 변경사항이 있어요.",
+    teamRefreshFailed: "팀 보드를 새로 불러오지 못했어요. 공유 링크를 확인해 주세요.",
+    switchedBoard: (label: string) => `${label} 보드로 전환했어요.`,
+    sharedTeamName: (id: string) => `공유 팀 ${id.slice(0, 4).toUpperCase()}`,
+    teamUpdatesLoaded: "팀 보드 변경사항을 불러왔어요.",
+    defaultTeamName: (count: number) => `팀 보드 ${count}`,
+    teamCreated: (name: string) => `${name} 팀 보드를 만들었어요. 링크를 복사해 공유할 수 있습니다.`,
+    teamCreateFailed: (message?: string) =>
+      message
+        ? `Supabase 팀 보드를 만들지 못했어요: ${message}`
+        : "Supabase 팀 보드를 만들지 못했어요. 환경변수와 Supabase 설정을 확인해 주세요.",
+    deleteMissingTeam: "삭제할 팀 보드를 찾지 못했어요.",
+    confirmDeleteTeam: (name: string) =>
+      `${name} 팀 보드를 삭제할까요? 공유된 클립도 Supabase에서 삭제됩니다.`,
+    teamDeleted: (name: string) => `${name} 팀 보드를 삭제했어요.`,
+    teamDeleteFailed: (message?: string) =>
+      message ? `팀 보드를 삭제하지 못했어요: ${message}` : "팀 보드를 삭제하지 못했어요. 잠시 뒤 다시 시도해 주세요.",
+    teamLinkCopied: "팀 링크를 복사했어요. 같은 주소로 팀 보드를 열 수 있습니다.",
+    localTeamLinkCopied: "로컬 팀 링크를 복사했어요. Supabase 연결 전에는 다른 기기와 동기화되지 않습니다.",
+    copyBlocked: "브라우저가 자동 복사를 막았어요. 아래 링크를 직접 복사해 주세요.",
+    teamLinkRecopied: "팀 링크를 다시 복사했어요.",
+    teamNotReady: "팀 보드를 Supabase에서 불러오지 못해 저장할 수 없어요. 팀 링크를 다시 열어 주세요.",
+    sensitiveConfirm: "비밀번호, 토큰, 카드번호 같은 민감정보일 수 있어요. ClipSpace에 저장할까요?",
+    sensitiveCancelled: "민감할 수 있는 클립 저장을 취소했어요.",
+    duplicateClip: "이미 저장된 클립이에요.",
+    imageSaved: "이미지를 ClipSpace에 저장했어요.",
+    flaggedSaved: "민감할 수 있는 내용이라 Review로 분류했어요.",
+    unsupportedImage: "지원하지 않는 이미지 형식이에요. PNG, JPEG, WebP, GIF만 저장됩니다.",
+    directImportBlocked: "이 브라우저에서는 바로 가져오기가 제한돼요. 입력칸에 붙여넣어 주세요.",
+    clipboardPermissionBlocked: "클립보드 권한이 막혔어요. 입력칸에 붙여넣고 Enter를 누르면 저장됩니다.",
+    resizeLabel: "패널 크기 조절",
+  },
+  en: {
+    initialStatus: "Copy something, then click this screen or press Cmd/Ctrl + V.",
+    teamLoaded: (name: string) => `Loaded the ${name} team board.`,
+    teamLoadFailed: "Could not load the team link. Check that the link is correct.",
+    missingTeamKey: "This team link is missing an access key. Ask the team to copy the link again.",
+    storageLoadFailed: "Could not load storage. Check your browser storage space.",
+    storageSaveFailed: "Could not write to storage. Check your browser storage space.",
+    teamSyncFailed: "Could not sync the team board to Supabase.",
+    teamUpdatesAvailable: "New team board changes are available.",
+    teamRefreshFailed: "Could not refresh the team board. Check the shared link.",
+    switchedBoard: (label: string) => `Switched to the ${label} board.`,
+    sharedTeamName: (id: string) => `Shared team ${id.slice(0, 4).toUpperCase()}`,
+    teamUpdatesLoaded: "Loaded team board changes.",
+    defaultTeamName: (count: number) => `Team board ${count}`,
+    teamCreated: (name: string) => `Created the ${name} team board. Copy the link to share it.`,
+    teamCreateFailed: (message?: string) =>
+      message
+        ? `Could not create the Supabase team board: ${message}`
+        : "Could not create the Supabase team board. Check environment variables and Supabase settings.",
+    deleteMissingTeam: "Could not find a team board to delete.",
+    confirmDeleteTeam: (name: string) =>
+      `Delete the ${name} team board? Shared clips will also be deleted from Supabase.`,
+    teamDeleted: (name: string) => `Deleted the ${name} team board.`,
+    teamDeleteFailed: (message?: string) =>
+      message ? `Could not delete the team board: ${message}` : "Could not delete the team board. Try again later.",
+    teamLinkCopied: "Copied the team link. Teammates can open the same board with this URL.",
+    localTeamLinkCopied: "Copied the local team link. Before Supabase is connected, it will not sync across devices.",
+    copyBlocked: "The browser blocked automatic copy. Copy the link below manually.",
+    teamLinkRecopied: "Copied the team link again.",
+    teamNotReady: "The team board is not loaded from Supabase yet. Open the team link again.",
+    sensitiveConfirm: "This may contain a password, token, or card number. Save it to ClipSpace?",
+    sensitiveCancelled: "Cancelled saving the potentially sensitive clip.",
+    duplicateClip: "This clip is already saved.",
+    imageSaved: "Saved the image to ClipSpace.",
+    flaggedSaved: "Saved as Review because it may contain sensitive content.",
+    unsupportedImage: "Unsupported image format. Only PNG, JPEG, WebP, and GIF are supported.",
+    directImportBlocked: "Direct import is limited in this browser. Paste into the input instead.",
+    clipboardPermissionBlocked: "Clipboard permission is blocked. Paste into the input and press Enter to save.",
+    resizeLabel: "Resize panels",
+  },
+};
 
 function clampSidebarWidth(value: number) {
   return Math.min(MAX_SIDEBAR_WIDTH, Math.max(MIN_SIDEBAR_WIDTH, Math.round(value)));
@@ -162,7 +253,9 @@ async function copyText(value: string) {
   }
 }
 
-export default function Home() {
+export default function Home({ locale = "ko" }: { locale?: AppLocale }) {
+  const copy = appCopy[locale];
+  const workspaceCopy = workspaceCopyByLocale[locale];
   const [isReady, setIsReady] = useState(false);
   const [workspace, setWorkspace] = useState<WorkspaceKey>("personal");
   const [hasSelectedWorkspace, setHasSelectedWorkspace] = useState(false);
@@ -172,7 +265,7 @@ export default function Home() {
   }));
   const [query, setQuery] = useState("");
   const [activeType, setActiveType] = useState<ClipType | "all">("all");
-  const [status, setStatus] = useState("복사한 뒤 이 화면을 클릭하거나 Cmd/Ctrl + V를 누르세요.");
+  const [status, setStatus] = useState(copy.initialStatus);
   const [sharedTeamLink, setSharedTeamLink] = useState("");
   const [pendingTeamBoard, setPendingTeamBoard] = useState<RemoteTeamBoard | null>(null);
   const [manualInput, setManualInput] = useState("");
@@ -224,10 +317,10 @@ export default function Home() {
               },
             };
             writeTeamUrl(remoteBoard.id, remoteBoard.shareToken, remoteBoard.accessKey);
-            setStatus(`${remoteBoard.name} 팀 보드를 불러왔어요.`);
+            setStatus(copy.teamLoaded(remoteBoard.name));
           } catch {
             selectedWorkspace = loadWorkspaceMode();
-            setStatus("팀 링크를 불러오지 못했어요. 링크가 맞는지 확인해 주세요.");
+            setStatus(copy.teamLoadFailed);
           }
         } else if (incomingTeamParam && incomingTeamKey) {
           try {
@@ -241,14 +334,14 @@ export default function Home() {
               },
             };
             writeTeamUrl(remoteBoard.id, remoteBoard.shareToken, remoteBoard.accessKey);
-            setStatus(`${remoteBoard.name} 팀 보드를 불러왔어요.`);
+            setStatus(copy.teamLoaded(remoteBoard.name));
           } catch {
             selectedWorkspace = loadWorkspaceMode();
-            setStatus("팀 링크를 불러오지 못했어요. 링크가 맞는지 확인해 주세요.");
+            setStatus(copy.teamLoadFailed);
           }
         } else if (incomingTeamParam && !incomingTeamKey) {
           selectedWorkspace = loadWorkspaceMode();
-          setStatus("팀 링크에 접근키가 없어요. 팀에서 링크를 다시 복사해 주세요.");
+          setStatus(copy.missingTeamKey);
         }
         setWorkspace(selectedWorkspace);
         setHasSelectedWorkspace(Boolean(incomingTeamParam) || hasStoredWorkspace());
@@ -261,7 +354,7 @@ export default function Home() {
         }
       } catch {
         if (!cancelled) {
-          setStatus("저장소를 불러오지 못했어요. 브라우저 저장 공간을 확인해 주세요.");
+          setStatus(copy.storageLoadFailed);
         }
       } finally {
         if (!cancelled) setIsReady(true);
@@ -278,7 +371,7 @@ export default function Home() {
   useEffect(() => {
     if (!isReady) return;
     saveWorkspaceState(workspace, clipsByWorkspace).catch(() => {
-      setStatus("저장소에 기록하지 못했어요. 브라우저 저장 공간을 확인해 주세요.");
+      setStatus(copy.storageSaveFailed);
     });
   }, [clipsByWorkspace, isReady, workspace]);
 
@@ -327,7 +420,7 @@ export default function Home() {
           };
         });
       } catch {
-        if (!cancelled) setStatus("팀 보드를 Supabase에 동기화하지 못했어요.");
+        if (!cancelled) setStatus(copy.teamSyncFailed);
       }
     };
 
@@ -353,11 +446,11 @@ export default function Home() {
           setPendingTeamBoard(null);
         } else {
           setPendingTeamBoard(remoteBoard);
-          setStatus("팀 보드에 새 변경사항이 있어요.");
+          setStatus(copy.teamUpdatesAvailable);
         }
         syncedTeamClipIdsRef.current[currentTeamId] = getClipIds(remoteBoard.clips);
       } catch {
-        if (!cancelled) setStatus("팀 보드를 새로 불러오지 못했어요. 공유 링크를 확인해 주세요.");
+        if (!cancelled) setStatus(copy.teamRefreshFailed);
       }
     };
 
@@ -391,7 +484,7 @@ export default function Home() {
     setSharedTeamLink("");
     setPendingTeamBoard(null);
     const modeKind = getWorkspaceMode(mode);
-    setStatus(`${workspaceCopy[modeKind].label} 보드로 전환했어요.`);
+    setStatus(copy.switchedBoard(workspaceCopy[modeKind].label));
     if (mode === "personal") {
       window.history.replaceState(null, "", window.location.pathname);
       return;
@@ -416,7 +509,7 @@ export default function Home() {
       if (!teamId) return current;
       const team = current.teams[teamId] ?? {
         id: teamId,
-        name: `공유 팀 ${teamId.slice(0, 4).toUpperCase()}`,
+        name: copy.sharedTeamName(teamId),
         createdAt: new Date().toISOString(),
         accessKey: undefined,
         clips: [],
@@ -449,11 +542,11 @@ export default function Home() {
     });
     syncedTeamClipIdsRef.current[currentTeamId] = getClipIds(remoteBoard.clips);
     setPendingTeamBoard(null);
-    setStatus("팀 보드 변경사항을 불러왔어요.");
+    setStatus(copy.teamUpdatesLoaded);
   };
 
   const createTeamBoard = async (name: string) => {
-    const trimmedName = name.trim() || `팀 보드 ${teamBoards.length + 1}`;
+    const trimmedName = name.trim() || copy.defaultTeamName(teamBoards.length + 1);
     try {
       const remoteBoard = await createRemoteTeamBoard(trimmedName);
       setClipsByWorkspace((current) => ({
@@ -467,13 +560,11 @@ export default function Home() {
         accessKey: remoteBoard.accessKey,
         shareToken: remoteBoard.shareToken,
       });
-      setStatus(`${remoteBoard.name} 팀 보드를 만들었어요. 링크를 복사해 공유할 수 있습니다.`);
+      setStatus(copy.teamCreated(remoteBoard.name));
       return;
     } catch (error) {
       setStatus(
-        error instanceof Error
-          ? `Supabase 팀 보드를 만들지 못했어요: ${error.message}`
-          : "Supabase 팀 보드를 만들지 못했어요. 환경변수와 Supabase 설정을 확인해 주세요.",
+        error instanceof Error ? copy.teamCreateFailed(error.message) : copy.teamCreateFailed(),
       );
     }
   };
@@ -481,12 +572,12 @@ export default function Home() {
   const deleteTeamBoard = async () => {
     const teamId = getTeamIdFromWorkspace(workspace);
     if (!teamId || !currentTeam?.accessKey) {
-      setStatus("삭제할 팀 보드를 찾지 못했어요.");
+      setStatus(copy.deleteMissingTeam);
       return;
     }
 
     const confirmed = window.confirm(
-      `${currentTeam.name} 팀 보드를 삭제할까요? 공유된 클립도 Supabase에서 삭제됩니다.`,
+      copy.confirmDeleteTeam(currentTeam.name),
     );
     if (!confirmed) return;
 
@@ -505,12 +596,10 @@ export default function Home() {
       });
       setWorkspace("personal");
       window.history.replaceState(null, "", window.location.pathname);
-      setStatus(`${currentTeam.name} 팀 보드를 삭제했어요.`);
+      setStatus(copy.teamDeleted(currentTeam.name));
     } catch (error) {
       setStatus(
-        error instanceof Error
-          ? `팀 보드를 삭제하지 못했어요: ${error.message}`
-          : "팀 보드를 삭제하지 못했어요. 잠시 뒤 다시 시도해 주세요.",
+        error instanceof Error ? copy.teamDeleteFailed(error.message) : copy.teamDeleteFailed(),
       );
     }
   };
@@ -531,9 +620,9 @@ export default function Home() {
     setStatus(
       copied
         ? shareToken || accessKey
-          ? "팀 링크를 복사했어요. 같은 주소로 팀 보드를 열 수 있습니다."
-          : "로컬 팀 링크를 복사했어요. Supabase 연결 전에는 다른 기기와 동기화되지 않습니다."
-        : "브라우저가 자동 복사를 막았어요. 아래 링크를 직접 복사해 주세요.",
+          ? copy.teamLinkCopied
+          : copy.localTeamLinkCopied
+        : copy.copyBlocked,
     );
   };
 
@@ -545,23 +634,23 @@ export default function Home() {
     const copied = await copyText(sharedTeamLink);
     setStatus(
       copied
-        ? "팀 링크를 다시 복사했어요."
-        : "브라우저가 자동 복사를 막았어요. 아래 링크를 직접 복사해 주세요.",
+        ? copy.teamLinkRecopied
+        : copy.copyBlocked,
     );
   };
 
   const addClipObject = (clip: Clip) => {
     if (workspace !== "personal" && !currentTeam?.accessKey) {
-      setStatus("팀 보드를 Supabase에서 불러오지 못해 저장할 수 없어요. 팀 링크를 다시 열어 주세요.");
+      setStatus(copy.teamNotReady);
       return;
     }
 
     if (clip.flagged) {
       const shouldSave = window.confirm(
-        "비밀번호, 토큰, 카드번호 같은 민감정보일 수 있어요. ClipSpace에 저장할까요?",
+        copy.sensitiveConfirm,
       );
       if (!shouldSave) {
-        setStatus("민감할 수 있는 클립 저장을 취소했어요.");
+        setStatus(copy.sensitiveCancelled);
         return;
       }
     }
@@ -572,18 +661,18 @@ export default function Home() {
     );
 
     if (duplicate) {
-      setStatus("이미 저장된 클립이에요.");
+      setStatus(copy.duplicateClip);
       return;
     }
 
     setWorkspaceClips((current) => [clip, ...current]);
     if (clip.type === "image") {
-      setStatus("이미지를 ClipSpace에 저장했어요.");
+      setStatus(copy.imageSaved);
       return;
     }
     setStatus(
       clip.flagged
-        ? "민감할 수 있는 내용이라 Review로 분류했어요."
+        ? copy.flaggedSaved
         : workspaceCopy[getWorkspaceMode(workspace)].status,
     );
   };
@@ -609,7 +698,7 @@ export default function Home() {
           );
           images.forEach((image) => addImageClip(image, "paste"));
         } catch {
-          setStatus("지원하지 않는 이미지 형식이에요. PNG, JPEG, WebP, GIF만 저장됩니다.");
+          setStatus(copy.unsupportedImage);
         }
         return;
       }
@@ -629,7 +718,7 @@ export default function Home() {
   const importFromClipboard = async () => {
     if (!navigator.clipboard) {
       manualInputRef.current?.focus();
-      setStatus("이 브라우저에서는 바로 가져오기가 제한돼요. 입력칸에 붙여넣어 주세요.");
+      setStatus(copy.directImportBlocked);
       return;
     }
 
@@ -651,7 +740,7 @@ export default function Home() {
 
     if (!navigator.clipboard.readText) {
       manualInputRef.current?.focus();
-      setStatus("이 브라우저에서는 바로 가져오기가 제한돼요. 입력칸에 붙여넣어 주세요.");
+      setStatus(copy.directImportBlocked);
       return;
     }
 
@@ -660,7 +749,7 @@ export default function Home() {
       addTextClip(text, "clipboard");
     } catch {
       manualInputRef.current?.focus();
-      setStatus("클립보드 권한이 막혔어요. 입력칸에 붙여넣고 Enter를 누르면 저장됩니다.");
+      setStatus(copy.clipboardPermissionBlocked);
     }
   };
 
@@ -692,11 +781,11 @@ export default function Home() {
 
   const groupedClips = useMemo(() => {
     return filteredClips.reduce<Record<string, Clip[]>>((groups, clip) => {
-      const key = formatDay(clip.createdAt);
+      const key = formatDay(clip.createdAt, locale);
       groups[key] = groups[key] ? [...groups[key], clip] : [clip];
       return groups;
     }, {});
-  }, [filteredClips]);
+  }, [filteredClips, locale]);
 
   const stats = useMemo(() => {
     return {
@@ -768,12 +857,13 @@ export default function Home() {
     window.addEventListener("pointerup", handlePointerUp);
   };
 
-  if (!isReady) return <AppLoading />;
+  if (!isReady) return <AppLoading locale={locale} />;
 
   return (
     <main className={ui.shell.app} id="top">
       {!hasSelectedWorkspace ? (
         <WorkspaceChooser
+          locale={locale}
           onCreateTeamBoard={createTeamBoard}
           onSelect={selectWorkspace}
           teamBoards={teamBoards}
@@ -781,6 +871,7 @@ export default function Home() {
       ) : null}
       <WorkspaceHeader
         currentTeam={currentTeam}
+        locale={locale}
         onCopyTeamLink={() => void copyTeamLink()}
         onCreateTeamBoard={createTeamBoard}
         onDeleteTeamBoard={() => void deleteTeamBoard()}
@@ -800,6 +891,7 @@ export default function Home() {
       >
         <Sidebar
           activeType={activeType}
+          locale={locale}
           manualInput={manualInput}
           manualInputRef={manualInputRef}
           hasTeamUpdates={Boolean(pendingTeamBoard && pendingTeamBoard.id === currentTeamId)}
@@ -817,7 +909,7 @@ export default function Home() {
         />
 
         <button
-          aria-label="패널 크기 조절"
+          aria-label={copy.resizeLabel}
           className={ui.resize.handle}
           onPointerDown={startResizing}
           type="button"
@@ -828,6 +920,7 @@ export default function Home() {
         <Timeline
           clips={filteredClips}
           groupedClips={groupedClips}
+          locale={locale}
           onAddNote={addClipNote}
           onClearWorkspace={() => setWorkspaceClips([])}
           onImportFromClipboard={() => void importFromClipboard()}
@@ -837,7 +930,7 @@ export default function Home() {
           workspace={workspace}
         />
       </section>
-      <SiteFooter />
+      <SiteFooter locale={locale} />
     </main>
   );
 }

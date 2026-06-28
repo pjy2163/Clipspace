@@ -13,7 +13,7 @@ const navItems = {
     { href: "/use-cases", label: "활용 사례" },
   ],
   en: [
-    { href: "/", label: "App" },
+    { href: "/en/app", label: "App" },
     { href: "/en/about", label: "About" },
     { href: "/en/guide", label: "Guide" },
     { href: "/en/privacy", label: "Privacy" },

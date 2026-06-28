@@ -1,11 +1,55 @@
 import type { KeyboardEvent as ReactKeyboardEvent, RefObject } from "react";
-import { typeLabels } from "@/lib/clip";
+import { typeLabelsByLocale } from "@/lib/clip";
 import { ui } from "@/styles/ui";
-import type { ClipType } from "@/types/clip";
+import type { AppLocale, ClipType } from "@/types/clip";
 import { FilterButton } from "./common";
+
+const sidebarCopy = {
+  ko: {
+    importTitle: "클립보드 가져오기",
+    importHelp: "버튼을 누르거나 이 화면에서 Ctrl/Cmd + V를 사용하세요.",
+    manualLabel: "직접 추가",
+    manualPlaceholder: "여기에 붙여넣거나 메모를 입력하세요.",
+    save: "저장",
+    search: "검색",
+    searchPlaceholder: "내용, 제목, 카테고리",
+    filters: "분류",
+    all: "전체",
+    loadChanges: "새 변경사항 불러오기",
+    recopyLink: "링크 다시 복사",
+    privacyTitle: "Privacy first",
+    privacyItems: [
+      "브라우저 IndexedDB에 로컬 저장",
+      "로그인/서버 업로드 없음",
+      "민감정보 저장 전 확인",
+      "안전한 이미지 형식만 허용",
+    ],
+  },
+  en: {
+    importTitle: "Import clipboard",
+    importHelp: "Click the button or press Ctrl/Cmd + V on this screen.",
+    manualLabel: "Add manually",
+    manualPlaceholder: "Paste content or type a note here.",
+    save: "Save",
+    search: "Search",
+    searchPlaceholder: "Content, title, category",
+    filters: "Filters",
+    all: "All",
+    loadChanges: "Load new changes",
+    recopyLink: "Copy link again",
+    privacyTitle: "Privacy first",
+    privacyItems: [
+      "Stored locally in browser IndexedDB",
+      "No login or server upload for personal clips",
+      "Sensitive-looking content is confirmed first",
+      "Only safe image formats are allowed",
+    ],
+  },
+};
 
 type SidebarProps = {
   activeType: ClipType | "all";
+  locale?: AppLocale;
   manualInput: string;
   query: string;
   status: string;
@@ -24,6 +68,7 @@ type SidebarProps = {
 
 export function Sidebar({
   activeType,
+  locale = "ko",
   manualInput,
   query,
   sharedTeamLink,
@@ -39,30 +84,33 @@ export function Sidebar({
   onQueryChange,
   onSelectType,
 }: SidebarProps) {
+  const copy = sidebarCopy[locale];
+  const typeLabels = typeLabelsByLocale[locale];
+
   return (
     <aside className="space-y-3">
       <button
         className={ui.button.paste}
         onClick={onImportFromClipboard}
       >
-        <span className="block text-sm font-semibold">클립보드 가져오기</span>
+        <span className="block text-sm font-semibold">{copy.importTitle}</span>
         <span className="mt-2 inline-flex rounded-md bg-white/10 px-2 py-1 text-xs font-semibold text-white/95">
           Click or paste
         </span>
         <span className="mt-2 block text-xs leading-5 text-[#d7dce5]">
-          버튼을 누르거나 이 화면에서 Ctrl/Cmd + V를 사용하세요.
+          {copy.importHelp}
         </span>
       </button>
 
       <div className={ui.panel.padded}>
         <label className={ui.form.label} htmlFor="manual">
-          직접 추가
+          {copy.manualLabel}
         </label>
         <textarea
           id="manual"
           ref={manualInputRef}
           className={ui.form.textarea}
-          placeholder="여기에 붙여넣거나 메모를 입력하세요."
+          placeholder={copy.manualPlaceholder}
           value={manualInput}
           onChange={(event) => onManualInputChange(event.target.value)}
           onKeyDown={onManualKeyDown}
@@ -71,28 +119,28 @@ export function Sidebar({
           className={ui.button.primary}
           onClick={onAddManualClip}
         >
-          저장
+          {copy.save}
         </button>
       </div>
 
       <div className={ui.panel.padded}>
         <label className={ui.form.label} htmlFor="search">
-          검색
+          {copy.search}
         </label>
         <input
           id="search"
           className={ui.form.input}
-          placeholder="내용, 제목, 카테고리"
+          placeholder={copy.searchPlaceholder}
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
         />
       </div>
 
       <div className={ui.panel.padded}>
-        <p className="text-sm font-semibold text-[#202124]">분류</p>
+        <p className="text-sm font-semibold text-[#202124]">{copy.filters}</p>
         <div className="mt-3 grid grid-cols-2 gap-2">
           <FilterButton active={activeType === "all"} onClick={() => onSelectType("all")}>
-            전체
+            {copy.all}
           </FilterButton>
           {(Object.keys(typeLabels) as ClipType[]).map((type) => (
             <FilterButton active={activeType === type} key={type} onClick={() => onSelectType(type)}>
@@ -110,7 +158,7 @@ export function Sidebar({
             onClick={onApplyTeamUpdates}
             type="button"
           >
-            새 변경사항 불러오기
+            {copy.loadChanges}
           </button>
         ) : null}
         {sharedTeamLink ? (
@@ -129,7 +177,7 @@ export function Sidebar({
                 onClick={onCopySharedTeamLink}
                 type="button"
               >
-                링크 다시 복사
+                {copy.recopyLink}
               </button>
             ) : null}
           </div>
@@ -137,12 +185,11 @@ export function Sidebar({
       </div>
 
       <div className={ui.panel.padded}>
-        <p className="text-sm font-semibold text-[#202124]">Privacy first</p>
+        <p className="text-sm font-semibold text-[#202124]">{copy.privacyTitle}</p>
         <ul className="mt-3 space-y-2 text-xs leading-5 text-[#5f6673]">
-          <li>브라우저 IndexedDB에 로컬 저장</li>
-          <li>로그인/서버 업로드 없음</li>
-          <li>민감정보 저장 전 확인</li>
-          <li>안전한 이미지 형식만 허용</li>
+          {copy.privacyItems.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
         </ul>
       </div>
     </aside>

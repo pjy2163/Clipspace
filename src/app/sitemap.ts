@@ -16,6 +16,7 @@ const routes = [
   { path: "/privacy", priority: 0.7 },
   { path: "/use-cases", priority: 0.8 },
   { path: "/en", priority: 0.9 },
+  { path: "/en/app", priority: 0.8 },
   { path: "/en/online-clipboard", priority: 0.7 },
   { path: "/en/team-clipboard", priority: 0.7 },
   { path: "/en/personal-clipboard", priority: 0.7 },

@@ -3,27 +3,48 @@ import type {
   ClipImage,
   ClipSource,
   ClipType,
+  AppLocale,
   WorkspaceCopy,
   WorkspaceKey,
   WorkspaceMode,
 } from "@/types/clip";
 
-export const workspaceCopy: Record<WorkspaceMode, WorkspaceCopy> = {
-  personal: {
-    label: "개인",
-    title: "개인 온라인 클립보드",
-    description: "내가 복사한 메모, 코드, 링크를 혼자 쓰는 온라인 클립보드로 정리합니다.",
-    empty: "개인 클립보드가 비어 있어요",
-    status: "개인 보드에 저장했어요.",
+export const workspaceCopyByLocale: Record<AppLocale, Record<WorkspaceMode, WorkspaceCopy>> = {
+  ko: {
+    personal: {
+      label: "개인",
+      title: "개인 온라인 클립보드",
+      description: "내가 복사한 메모, 코드, 링크를 혼자 쓰는 온라인 클립보드로 정리합니다.",
+      empty: "개인 클립보드가 비어 있어요",
+      status: "개인 보드에 저장했어요.",
+    },
+    team: {
+      label: "팀",
+      title: "팀 공유 클립보드",
+      description: "팀 프로젝트에서 같이 볼 자료, 레퍼런스, 코드 조각을 모으는 팀 공유 클립보드입니다.",
+      empty: "팀 공유 클립보드가 비어 있어요",
+      status: "팀 공유 클립보드에 저장했어요.",
+    },
   },
-  team: {
-    label: "팀",
-    title: "팀 공유 클립보드",
-    description: "팀 프로젝트에서 같이 볼 자료, 레퍼런스, 코드 조각을 모으는 팀 공유 클립보드입니다.",
-    empty: "팀 공유 클립보드가 비어 있어요",
-    status: "팀 공유 클립보드에 저장했어요.",
+  en: {
+    personal: {
+      label: "Personal",
+      title: "Personal online clipboard",
+      description: "Organize copied notes, code, and links in your own online clipboard.",
+      empty: "Your personal clipboard is empty",
+      status: "Saved to your personal board.",
+    },
+    team: {
+      label: "Team",
+      title: "Team shared clipboard",
+      description: "Collect project references, snippets, and notes in a team shared clipboard.",
+      empty: "Your team shared clipboard is empty",
+      status: "Saved to the team shared clipboard.",
+    },
   },
 };
+
+export const workspaceCopy = workspaceCopyByLocale.ko;
 
 export function createTeamWorkspaceKey(teamId: string): WorkspaceKey {
   return `team:${teamId}`;
@@ -45,14 +66,26 @@ export function createTeamBoardId() {
   return randomPart || Math.random().toString(36).slice(2, 14);
 }
 
-export const typeLabels: Record<ClipType, string> = {
-  text: "텍스트",
-  link: "링크",
-  code: "코드",
-  contact: "연락처",
-  sensitive: "민감",
-  image: "이미지",
+export const typeLabelsByLocale: Record<AppLocale, Record<ClipType, string>> = {
+  ko: {
+    text: "텍스트",
+    link: "링크",
+    code: "코드",
+    contact: "연락처",
+    sensitive: "민감",
+    image: "이미지",
+  },
+  en: {
+    text: "Text",
+    link: "Link",
+    code: "Code",
+    contact: "Contact",
+    sensitive: "Review",
+    image: "Image",
+  },
 };
+
+export const typeLabels = typeLabelsByLocale.ko;
 
 export const typeTone: Record<ClipType, string> = {
   text: "border-slate-200 bg-slate-50 text-slate-700",

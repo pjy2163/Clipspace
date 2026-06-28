@@ -1,9 +1,63 @@
 import Link from "next/link";
-import { createTeamWorkspaceKey, getWorkspaceMode, workspaceCopy } from "@/lib/clip";
-import type { TeamBoard, WorkspaceKey } from "@/types/clip";
+import { createTeamWorkspaceKey, getWorkspaceMode, workspaceCopyByLocale } from "@/lib/clip";
+import type { AppLocale, TeamBoard, WorkspaceKey } from "@/types/clip";
 import { BrandIcon, ModeButton, Stat } from "./common";
 
+const headerCopy = {
+  ko: {
+    personalDescription: "내가 복사한 메모, 코드, 링크를 혼자 쓰는 온라인 클립보드로 정리합니다.",
+    teamDescription: "팀 링크로 모은 자료, 레퍼런스, 코드 조각을 팀 공유 클립보드에서 함께 봅니다.",
+    infoLinks: [
+      { href: "/about", label: "소개" },
+      { href: "/guide", label: "사용법" },
+      { href: "/privacy", label: "개인정보" },
+      { href: "/use-cases", label: "활용 사례" },
+    ],
+    refreshLabel: "ClipSpace 새로고침",
+    refreshTitle: "새로고침",
+    navLabel: "ClipSpace 안내 페이지",
+    promptTeamName: "팀 이름을 입력하세요.",
+    teamSelectLabel: "팀 보드 선택",
+    teamSelectPlaceholder: "팀 선택",
+    createTeam: "팀 생성",
+    copyLink: "링크 복사",
+    deleteTeam: "팀 삭제",
+    privacyLine: "클립은 로컬에 저장되고, 팀 공유 클립보드에서 필요할 때만 공유됩니다.",
+    stats: {
+      total: "전체",
+      today: "오늘",
+      images: "이미지",
+    },
+  },
+  en: {
+    personalDescription: "Organize copied notes, code, and links in your own online clipboard.",
+    teamDescription: "Review references, snippets, and notes together in a team shared clipboard.",
+    infoLinks: [
+      { href: "/en/about", label: "About" },
+      { href: "/en/guide", label: "Guide" },
+      { href: "/en/privacy", label: "Privacy" },
+      { href: "/en/use-cases", label: "Use cases" },
+    ],
+    refreshLabel: "Refresh ClipSpace",
+    refreshTitle: "Refresh",
+    navLabel: "ClipSpace info pages",
+    promptTeamName: "Enter a team name.",
+    teamSelectLabel: "Select team board",
+    teamSelectPlaceholder: "Select team",
+    createTeam: "Create team",
+    copyLink: "Copy link",
+    deleteTeam: "Delete team",
+    privacyLine: "Clips stay local, and are shared only when you use a team shared clipboard.",
+    stats: {
+      total: "Total",
+      today: "Today",
+      images: "Images",
+    },
+  },
+};
+
 type WorkspaceHeaderProps = {
+  locale?: AppLocale;
   workspace: WorkspaceKey;
   currentTeam: TeamBoard | null;
   teamBoards: TeamBoard[];
@@ -20,6 +74,7 @@ type WorkspaceHeaderProps = {
 
 export function WorkspaceHeader({
   currentTeam,
+  locale = "ko",
   onCopyTeamLink,
   onCreateTeamBoard,
   onDeleteTeamBoard,
@@ -29,19 +84,16 @@ export function WorkspaceHeader({
   onSelectWorkspace,
 }: WorkspaceHeaderProps) {
   const mode = getWorkspaceMode(workspace);
+  const copy = headerCopy[locale];
+  const workspaceCopy = workspaceCopyByLocale[locale];
   const title = workspace === "personal" ? workspaceCopy.personal.title : currentTeam?.name ?? "Team board";
   const description =
     workspace === "personal"
-      ? "내가 복사한 메모, 코드, 링크를 혼자 쓰는 온라인 클립보드로 정리합니다."
-      : "팀 링크로 모은 자료, 레퍼런스, 코드 조각을 팀 공유 클립보드에서 함께 봅니다.";
-  const infoLinks = [
-    { href: "/about", label: "소개" },
-    { href: "/guide", label: "사용법" },
-    { href: "/privacy", label: "개인정보" },
-    { href: "/use-cases", label: "활용 사례" },
-  ];
+      ? copy.personalDescription
+      : copy.teamDescription;
+  const infoLinks = copy.infoLinks;
   const requestTeamName = () => {
-    const name = window.prompt("팀 이름을 입력하세요.");
+    const name = window.prompt(copy.promptTeamName);
     if (name === null) return;
     onCreateTeamBoard(name);
   };
@@ -51,10 +103,10 @@ export function WorkspaceHeader({
       <div className="mx-auto flex w-full max-w-[1440px] flex-col px-4 sm:px-5">
         <div className="flex min-h-20 flex-col gap-4 border-b border-[#edf0f4] py-4 lg:flex-row lg:items-center lg:justify-between">
           <button
-            aria-label="ClipSpace 새로고침"
+            aria-label={copy.refreshLabel}
             className="flex w-fit items-center gap-3 rounded-xl transition hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-[#315fbd] focus:ring-offset-2"
             onClick={() => window.location.reload()}
-            title="새로고침"
+            title={copy.refreshTitle}
             type="button"
           >
             <BrandIcon className="size-11 rounded-xl" />
@@ -66,7 +118,7 @@ export function WorkspaceHeader({
           </button>
 
           <nav
-            aria-label="ClipSpace 안내 페이지"
+            aria-label={copy.navLabel}
             className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[#202124] lg:justify-center"
           >
             {infoLinks.map((item) => (
@@ -83,12 +135,12 @@ export function WorkspaceHeader({
           <div className="flex w-fit flex-nowrap items-center gap-1 rounded-full border border-[#e2e5ea] bg-[#f6f7f9] p-1">
             <ModeButton
               active={mode === "personal"}
-              label="개인"
+              label={workspaceCopy.personal.label}
               onClick={() => onSelectWorkspace("personal")}
             />
             {teamBoards.length > 0 ? (
               <select
-                aria-label="팀 보드 선택"
+                aria-label={copy.teamSelectLabel}
                 className="h-9 rounded-md border border-transparent bg-white px-2 text-sm font-semibold text-[#354052] outline-none transition focus:border-[#315fbd] focus:ring-2 focus:ring-[#dbe6ff]"
                 value={currentTeam?.id ?? ""}
                 onChange={(event) => {
@@ -98,7 +150,7 @@ export function WorkspaceHeader({
                 }}
               >
                 <option value="" disabled>
-                  팀 선택
+                  {copy.teamSelectPlaceholder}
                 </option>
                 {teamBoards.map((team) => (
                   <option key={team.id} value={team.id}>
@@ -112,7 +164,7 @@ export function WorkspaceHeader({
               onClick={requestTeamName}
               type="button"
             >
-              팀 생성
+              {copy.createTeam}
             </button>
             {mode === "team" ? (
               <>
@@ -121,14 +173,14 @@ export function WorkspaceHeader({
                   onClick={onCopyTeamLink}
                   type="button"
                 >
-                  링크 복사
+                  {copy.copyLink}
                 </button>
                 <button
                   className="rounded-md border border-[#ead6d6] bg-white px-3 py-2 text-sm font-semibold text-[#9a3d3d] transition hover:bg-[#fff6f6]"
                   onClick={onDeleteTeamBoard}
                   type="button"
                 >
-                  팀 삭제
+                  {copy.deleteTeam}
                 </button>
               </>
             ) : null}
@@ -146,14 +198,14 @@ export function WorkspaceHeader({
             <p className="max-w-3xl text-sm leading-6 text-[#5f6673] sm:text-base">
               <span>{description}</span>
               <br />
-              <span>클립은 로컬에 저장되고, 팀 공유 클립보드에서 필요할 때만 공유됩니다.</span>
+              <span>{copy.privacyLine}</span>
             </p>
           </div>
 
           <div className="grid w-fit grid-cols-3 gap-2 rounded-lg border border-[#e2e5ea] bg-[#f6f7f9] p-2">
-            <Stat label="전체" value={stats.total} />
-            <Stat label="오늘" value={stats.today} />
-            <Stat label="이미지" value={stats.images} />
+            <Stat label={copy.stats.total} value={stats.total} />
+            <Stat label={copy.stats.today} value={stats.today} />
+            <Stat label={copy.stats.images} value={stats.images} />
           </div>
         </div>
       </div>
