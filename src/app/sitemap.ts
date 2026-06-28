@@ -8,6 +8,9 @@ const siteUrl =
 
 const routes = [
   { path: "", priority: 1 },
+  { path: "/online-clipboard", priority: 0.9 },
+  { path: "/team-clipboard", priority: 0.9 },
+  { path: "/personal-clipboard", priority: 0.9 },
   { path: "/about", priority: 0.8 },
   { path: "/guide", priority: 0.8 },
   { path: "/privacy", priority: 0.7 },
