@@ -10,7 +10,7 @@ const siteUrl =
       ? "https://clipspace.co.kr"
       : "http://localhost:3000";
 const siteName = "ClipSpace";
-const title = "ClipSpace 클립스페이스 - 웹 클립보드, 온라인 클립보드, 공유 클립보드";
+const title = "온라인 클립보드 - 클립스페이스, 웹 클립보드와 공유 클립보드";
 const description =
   "클립스페이스는 복사한 링크, 코드, 메모, 이미지를 웹 클립보드에 저장하고 개인 온라인 클립보드와 팀 공유 클립보드로 다시 찾는 메모장입니다.";
 const previewImage = "/clipspace-preview.png";

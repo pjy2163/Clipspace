@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { InfoList, InfoPage, InfoSection } from "@/components/info/InfoPage";
 
 export const metadata: Metadata = {
-  title: "웹 클립보드와 온라인 클립보드 - 복사한 링크와 코드를 다시 찾는 ClipSpace",
+  title: "온라인 클립보드 - 클립스페이스에서 복사한 링크와 코드 다시 찾기",
   description:
     "ClipSpace는 복사한 링크, 코드, 메모, 이미지를 카드로 저장하고 검색해서 다시 찾는 웹 클립보드이자 온라인 클립보드입니다.",
 };

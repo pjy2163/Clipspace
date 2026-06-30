@@ -34,7 +34,7 @@ const faqJsonLd = {
 };
 
 export const metadata: Metadata = {
-  title: "ClipSpace 사용법 - 웹 클립보드와 온라인 클립보드 저장",
+  title: "온라인 클립보드 사용법 - 클립스페이스 저장과 검색",
   description:
     "복사한 내용을 ClipSpace 웹 클립보드와 온라인 클립보드에 저장하고 메모, 검색, 팀 공유 클립보드로 다시 쓰는 방법입니다.",
 };

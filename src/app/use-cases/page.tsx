@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { InfoList, InfoPage, InfoSection } from "@/components/info/InfoPage";
 
 export const metadata: Metadata = {
-  title: "ClipSpace 활용 사례 - 웹 클립보드, 온라인 클립보드와 공유 메모장",
+  title: "온라인 클립보드 활용 사례 - 클립스페이스",
   description:
     "공부, 개발, 자료 조사, 팀 프로젝트에서 웹 클립보드, 온라인 클립보드, 공유 클립보드로 ClipSpace를 쓰기 좋은 상황입니다.",
 };
